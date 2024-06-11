@@ -1,0 +1,4 @@
+subst
+*.o
+.cache
+build/
