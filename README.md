@@ -1,5 +1,7 @@
 # subst
 
+Find hex strings in a binary and replace bytes with an interpreted language. For usage information run the compiled binary with no arguments
+
 ## subst file format
 ```
 rep ; bytes ; replacement_bytes					# Replace all instances of the byte array with the given byte array
@@ -10,6 +12,10 @@ inv ; location									# Invert a conditional at the given location
 ```
 
 ## Building
+
+### External dependencies
+- capstone
+
 Build the project with cmake by running the following commands
 ```sh
 mkdir build
