@@ -261,11 +261,31 @@ namespace subst
 						// Only check the first instruction since that is supposed to be a conditional
 						mnemonic conditional = str_to_mnemonic.at(insn[0].mnemonic);
 
+						auto log_invert = [cmd](const std::string& left_operand, const std::string& right_operand)
+						{
+							std::cout << "inverting " << left_operand << " -> " << right_operand << " at " << std::hex << "0x" << cmd.location << '\n';
+						};
+
 						switch (conditional)
 						{
 							case mnemonic::je:
-								std::cout << "inverting je -> jne at " << std::hex << "0x" << cmd.location << '\n';
+								log_invert("je", "jne");
 								bytes[cmd.location] = 0x75;
+								break;
+
+							case mnemonic::jne:
+								log_invert("jne", "je");
+								bytes[cmd.location] = 0x74;
+								break;
+
+							case mnemonic::jz:
+								log_invert("jz", "jnz");
+								bytes[cmd.location] = 0x75;
+								break;
+
+							case mnemonic::jnz:
+								log_invert("jnz", "jz");
+								bytes[cmd.location] = 0x74;
 								break;
 
 							default:
