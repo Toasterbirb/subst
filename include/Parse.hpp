@@ -33,4 +33,5 @@ namespace subst
 
 	std::vector<std::string> read_file(const std::string& file_path);
 	std::vector<subst_cmd> parse_subst(const std::vector<std::string>& subst_lines);
+	subst_cmd parse_subst_tokens(const std::vector<std::string>& tokens, const std::string& original_line = "<nothing>");
 }

@@ -78,80 +78,85 @@ namespace subst
 			}
 
 			// Parse the tokens
-			subst_cmd cmd;
-			cmd.mode = subst_cmd::str_to_mode.at(tokens[0]);
-
-			switch (cmd.mode)
-			{
-				// rep ; bytes ; replacement_bytes
-				case subst_cmd::mode::rep:
-				{
-					if (tokens.size() != 3)
-					{
-						std::cout << "invalid byte replacement: " << original_line << '\n';
-						exit(1);
-					}
-
-					cmd.bytes = hex_str_to_bytes(tokens[1]);
-					cmd.replacement_bytes = hex_str_to_bytes(tokens[2]);
-					break;
-				}
-
-				// repat ; location ; replacement_bytes
-				case subst_cmd::mode::repat:
-				{
-					if (tokens.size() != 3)
-					{
-						std::cout << "invalid location replacement: " << original_line << '\n';
-						exit(1);
-					}
-
-					cmd.location = std::stoi(tokens[1], 0, 16);
-					cmd.replacement_bytes = hex_str_to_bytes(tokens[2]);
-
-					break;
-				}
-
-				case subst_cmd::mode::nop:
-				{
-					// nop ; bytes
-					if (tokens.size() == 2)
-					{
-						cmd.bytes = hex_str_to_bytes(tokens[1]);
-					}
-					// nop ; location ; amount_of_bytes_to_replace
-					else if (tokens.size() == 3)
-					{
-						cmd.location = std::stoi(tokens[1], 0, 16);
-						cmd.count = std::stoi(tokens[2]);
-					}
-					else
-					{
-						std::cout << "invalid NOP replacement: " << original_line << '\n';
-						exit(1);
-					}
-
-					break;
-				}
-
-				// inv ; location
-				case subst_cmd::mode::inv:
-				{
-					if (tokens.size() != 2)
-					{
-						std::cout << "invalid conditional inversion: " << original_line << '\n';
-						exit(1);
-					}
-
-					cmd.location = std::stoi(tokens[1], 0, 16);
-
-					break;
-				}
-			}
-
-			commands.push_back(cmd);
+			commands.emplace_back(parse_subst_tokens(tokens, original_line));
 		}
 
 		return commands;
+	}
+
+	subst_cmd parse_subst_tokens(const std::vector<std::string>& tokens, const std::string& original_line)
+	{
+		subst_cmd cmd;
+		cmd.mode = subst_cmd::str_to_mode.at(tokens[0]);
+
+		switch (cmd.mode)
+		{
+			// rep ; bytes ; replacement_bytes
+			case subst_cmd::mode::rep:
+			{
+				if (tokens.size() != 3)
+				{
+					std::cout << "invalid byte replacement: " << original_line << '\n';
+					exit(1);
+				}
+
+				cmd.bytes = hex_str_to_bytes(tokens[1]);
+				cmd.replacement_bytes = hex_str_to_bytes(tokens[2]);
+				break;
+			}
+
+			// repat ; location ; replacement_bytes
+			case subst_cmd::mode::repat:
+			{
+				if (tokens.size() != 3)
+				{
+					std::cout << "invalid location replacement: " << original_line << '\n';
+					exit(1);
+				}
+
+				cmd.location = std::stoi(tokens[1], 0, 16);
+				cmd.replacement_bytes = hex_str_to_bytes(tokens[2]);
+
+				break;
+			}
+
+			case subst_cmd::mode::nop:
+			{
+				// nop ; bytes
+				if (tokens.size() == 2)
+				{
+					cmd.bytes = hex_str_to_bytes(tokens[1]);
+				}
+				// nop ; location ; amount_of_bytes_to_replace
+				else if (tokens.size() == 3)
+				{
+					cmd.location = std::stoi(tokens[1], 0, 16);
+					cmd.count = std::stoi(tokens[2]);
+				}
+				else
+				{
+					std::cout << "invalid NOP replacement: " << original_line << '\n';
+					exit(1);
+				}
+
+				break;
+			}
+
+			// inv ; location
+			case subst_cmd::mode::inv:
+			{
+				if (tokens.size() != 2)
+				{
+					std::cout << "invalid conditional inversion: " << original_line << '\n';
+					exit(1);
+				}
+
+				cmd.location = std::stoi(tokens[1], 0, 16);
+
+				break;
+			}
+		}
+
+		return cmd;
 	}
 }
