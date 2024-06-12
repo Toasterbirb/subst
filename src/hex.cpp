@@ -1,17 +1,21 @@
 #include "Hex.hpp"
 
-#include <algorithm>
 #include <capstone/capstone.h>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <regex>
 
 std::vector<u8> hex_str_to_int(std::string hex_string)
 {
 	std::vector<u8> hex_values;
 
 	// Remove all whitespace from the hex string
-	hex_string.erase(std::remove(hex_string.begin(), hex_string.end(), ' '), hex_string.end());
+	std::erase(hex_string, ' ');
+
+	// Remove all instances of "0x" from the string
+	std::regex zero_x_pattern("0x");
+	hex_string = std::regex_replace(hex_string, zero_x_pattern, "");
 
 	while (!hex_string.empty())
 	{
