@@ -24,7 +24,7 @@ target_link_libraries(${PROJECT_NAME} clipp capstone)
 # Build tests
 add_executable(pass_check ./tests/pass_check.c)
 target_compile_options(pass_check PUBLIC -O0)
-set(TEST_FILES ./tests/test.sh ./tests/pass_check.subst)
+set(TEST_FILES ./tests/test.sh ./tests/pass_check.sbt)
 file(COPY ${TEST_FILES} DESTINATION ./)
 add_custom_target(test DEPENDS pass_check ${PROJECT_NAME} COMMAND ./test.sh)
 

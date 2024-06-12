@@ -1,6 +1,6 @@
 #!/bin/bash
 
-readonly SUBST_FILE_PATH="./pass_check.subst"
+readonly SUBST_FILE_PATH="./pass_check.sbt"
 readonly TEST_PROGRAM_PATH="./pass_check"
 readonly TEST_PROGRAM_MD5_CHECKSUM="4af65211188a58effc2035942d4c6743"
 readonly PATCHED_TEST_PROGRAM_PATH="./pass_check.patched"
