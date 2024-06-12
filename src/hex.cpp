@@ -8,7 +8,7 @@
 
 namespace subst
 {
-	std::vector<u8> hex_str_to_int(std::string hex_string)
+	std::vector<u8> hex_str_to_bytes(std::string hex_string)
 	{
 		std::vector<u8> hex_values;
 
@@ -37,6 +37,12 @@ namespace subst
 		}
 
 		return hex_values;
+	}
+
+	void print_bytes(const std::vector<u8>& bytes)
+	{
+		for (size_t i = 0; i < bytes.size(); ++i)
+			printf("%02x ", bytes[i]);
 	}
 
 	void disasm_bytes(const std::vector<u8>& bytes, u64 starting_address, bool x86_32bit_mode)

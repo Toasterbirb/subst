@@ -1,6 +1,7 @@
 #include "Hex.hpp"
-#include "Search.hpp"
+#include "Mnemonics.hpp"
 #include "Patch.hpp"
+#include "Search.hpp"
 
 #include <assert.h>
 #include <capstone/capstone.h>
@@ -13,6 +14,27 @@
 
 namespace subst
 {
+	////////////////////////////////////
+	// Private functions declarations //
+	////////////////////////////////////
+
+	std::vector<std::string> tokenize_string(const std::string& line, const char separator);
+
+
+
+	std::vector<std::string> tokenize_string(const std::string& line, const char separator)
+	{
+		std::vector<std::string> tokens;
+
+		std::istringstream line_stream(line);
+		std::string token;
+
+		while (std::getline(line_stream, token, separator))
+			tokens.push_back(token);
+
+		return tokens;
+	}
+
 	std::vector<subst_cmd> parse_subst_file(const std::string& subst_file_path)
 	{
 		std::ifstream file(subst_file_path);
@@ -43,19 +65,12 @@ namespace subst
 
 			// Split the line into tokens
 			constexpr char split_char = ';';
-			std::vector<std::string> tokens;
+			std::vector<std::string> tokens = tokenize_string(line, split_char);
 
-			{
-				std::istringstream line_stream(line);
-				std::string token;
-
-				while (std::getline(line_stream, token, split_char))
-					tokens.push_back(token);
-			}
 
 			if (tokens.size() <= 1)
 			{
-				std::cout << "Invalid line: " << original_line << '\n';
+				std::cout << "invalid line: " << original_line << '\n';
 				exit(1);
 			}
 
@@ -70,12 +85,12 @@ namespace subst
 				{
 					if (tokens.size() != 3)
 					{
-						std::cout << "Invalid byte replacement: " << original_line << '\n';
+						std::cout << "invalid byte replacement: " << original_line << '\n';
 						exit(1);
 					}
 
-					cmd.bytes = hex_str_to_int(tokens[1]);
-					cmd.replacement_bytes = hex_str_to_int(tokens[2]);
+					cmd.bytes = hex_str_to_bytes(tokens[1]);
+					cmd.replacement_bytes = hex_str_to_bytes(tokens[2]);
 					break;
 				}
 
@@ -84,12 +99,12 @@ namespace subst
 				{
 					if (tokens.size() != 3)
 					{
-						std::cout << "Invalid location replacement: " << original_line << '\n';
+						std::cout << "invalid location replacement: " << original_line << '\n';
 						exit(1);
 					}
 
 					cmd.location = std::stoi(tokens[1], 0, 16);
-					cmd.replacement_bytes = hex_str_to_int(tokens[2]);
+					cmd.replacement_bytes = hex_str_to_bytes(tokens[2]);
 
 					break;
 				}
@@ -99,7 +114,7 @@ namespace subst
 					// nop ; bytes
 					if (tokens.size() == 2)
 					{
-						cmd.bytes = hex_str_to_int(tokens[1]);
+						cmd.bytes = hex_str_to_bytes(tokens[1]);
 					}
 					// nop ; location ; amount_of_bytes_to_replace
 					else if (tokens.size() == 3)
@@ -109,7 +124,7 @@ namespace subst
 					}
 					else
 					{
-						std::cout << "Invalid NOP replacement: " << original_line << '\n';
+						std::cout << "invalid NOP replacement: " << original_line << '\n';
 						exit(1);
 					}
 
@@ -121,7 +136,7 @@ namespace subst
 				{
 					if (tokens.size() != 2)
 					{
-						std::cout << "Invalid conditional inversion: " << original_line << '\n';
+						std::cout << "invalid conditional inversion: " << original_line << '\n';
 						exit(1);
 					}
 
@@ -147,18 +162,14 @@ namespace subst
 				{
 					if (cmd.bytes.size() != cmd.replacement_bytes.size())
 					{
-						std::cout << "The amount of bytes to replace doesn't match with the amount of replacement bytes\n";
+						std::cout << "the amount of bytes to replace doesn't match with the amount of replacement bytes\n";
 						exit(1);
 					}
 
 					std::cout << "replacing all instances of ";
-					for (size_t i = 0; i < cmd.bytes.size(); ++i)
-						printf("%02x ", cmd.bytes[i]);
-
+					print_bytes(cmd.bytes);
 					std::cout << "with ";
-
-					for (size_t i = 0; i < cmd.bytes.size(); ++i)
-						printf("%02x ", cmd.replacement_bytes[i]);
+					print_bytes(cmd.replacement_bytes);
 
 					std::cout << '\n';
 
@@ -197,8 +208,7 @@ namespace subst
 						assert(!cmd.bytes.empty());
 
 						std::cout << "replacing all instances of ";
-						for (size_t i = 0; i < cmd.bytes.size(); ++i)
-							printf("%02x ", cmd.bytes[i]);
+						print_bytes(cmd.bytes);
 						std::cout << "with NOPs\n";
 
 						// Find all locations where the byte array appears at
@@ -246,50 +256,41 @@ namespace subst
 					size_t instruction_count = cs_disasm(handle, bytes_to_disassemble.data(), bytes_to_disassemble.size(), cmd.location, 0, &insn);
 					if (instruction_count > 0)
 					{
-						enum class mnemonic
-						{
-							je, jne, jz, jnz
-						};
-
-						static const std::unordered_map<std::string, mnemonic> str_to_mnemonic = {
-							{ "je", mnemonic::je },
-							{ "jne", mnemonic::jne },
-							{ "jz", mnemonic::jz },
-							{ "jnz", mnemonic::jnz }
-						};
-
 						// Only check the first instruction since that is supposed to be a conditional
 						mnemonic conditional = str_to_mnemonic.at(insn[0].mnemonic);
 
-						auto log_invert = [cmd](const std::string& left_operand, const std::string& right_operand)
+						const auto log_invert = [cmd](const std::string& left_operand, const std::string& right_operand)
 						{
 							std::cout << "inverting " << left_operand << " -> " << right_operand << " at " << std::hex << "0x" << cmd.location << '\n';
 						};
 
+						constexpr u8 is_equal = 0x75;
+						constexpr u8 not_equal = 0x74;
+
 						switch (conditional)
 						{
 							case mnemonic::je:
-								log_invert("je", "jne");
-								bytes[cmd.location] = 0x75;
+								log_invert(mnemonic_str::je, mnemonic_str::jne);
+								bytes[cmd.location] = is_equal;
 								break;
 
 							case mnemonic::jne:
-								log_invert("jne", "je");
-								bytes[cmd.location] = 0x74;
+								log_invert(mnemonic_str::jne, mnemonic_str::je);
+								bytes[cmd.location] = not_equal;
 								break;
 
 							case mnemonic::jz:
-								log_invert("jz", "jnz");
-								bytes[cmd.location] = 0x75;
+								log_invert(mnemonic_str::jz, mnemonic_str::jnz);
+								bytes[cmd.location] = is_equal;
 								break;
 
 							case mnemonic::jnz:
-								log_invert("jnz", "jz");
-								bytes[cmd.location] = 0x74;
+								log_invert(mnemonic_str::jnz, mnemonic_str::jz);
+								bytes[cmd.location] = not_equal;
 								break;
 
 							default:
-								std::cout << "unhandled conditional inverstion: " << insn[0].mnemonic << '\n';
+								std::cout << "unhandled conditional inversion: " << insn[0].mnemonic << '\n';
 								break;
 						}
 

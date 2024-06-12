@@ -7,7 +7,7 @@ namespace subst
 {
 	std::vector<size_t> search_bytes(std::span<u8> bytes, const std::string& hex_string)
 	{
-		std::vector<u8> bytes_to_find = hex_str_to_int(hex_string);
+		std::vector<u8> bytes_to_find = hex_str_to_bytes(hex_string);
 		return search_bytes(bytes, bytes_to_find);
 	}
 

@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	std::ifstream bin_file(binary_file_path, std::ios::in | std::ios::binary | std::ios::out);
+	std::ifstream bin_file(binary_file_path, std::ios::in | std::ios::binary);
 	if (!bin_file.is_open())
 	{
 		std::cout << "Couldn't open file: " << binary_file_path << "\n";
@@ -78,10 +78,10 @@ int main(int argc, char** argv)
 		{
 			if (disassemble)
 			{
-				std::vector<u8> bytes = subst::hex_str_to_int(hex_string);
+				std::vector<u8> bytes = subst::hex_str_to_bytes(hex_string);
 				subst::disasm_bytes(bytes, 0x0, disas_32bit_mode);
 
-				std::cout << "\nLocations:\n";
+				std::cout << "\nlocations:\n";
 			}
 
 			std::vector<size_t> locations = subst::search_bytes(binary_data, hex_string);
@@ -95,8 +95,8 @@ int main(int argc, char** argv)
 
 			if (std::filesystem::exists(patched_file_path) && !overwrite_patched_file)
 			{
-				std::cout	<< "A patched file already exists at " << patched_file_path << '\n'
-							<< "Overwrite the file? (y/n): ";
+				std::cout	<< "a patched file already exists at " << patched_file_path << '\n'
+							<< "overwrite the file? (y/n): ";
 
 				char answer;
 				std::cin >> answer;
@@ -128,7 +128,7 @@ int main(int argc, char** argv)
 		}
 
 		case mode::help:
-			assert(1 == 0 && "You shouldn't be here");
+			assert(1 == 0 && "you shouldn't be here");
 			break;
 	}
 
