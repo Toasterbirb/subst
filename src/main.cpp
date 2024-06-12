@@ -1,4 +1,5 @@
 #include "Hex.hpp"
+#include "Patch.hpp"
 #include "Search.hpp"
 #include "Types.hpp"
 
@@ -6,6 +7,7 @@
 #include <cassert>
 #include <clipp.h>
 #include <cstddef>
+#include <filesystem>
 #include <fstream>
 #include <inttypes.h>
 #include <iostream>
@@ -20,24 +22,29 @@ int main(int argc, char** argv)
 	std::string binary_file_path;
 	std::string hex_string;
 
+	// Search options
 	bool disassemble = false;
 	bool disas_32bit_mode = false;
+
+	// Patch options
+	bool overwrite_patched_file = false;
 
 	auto search_mode = (
 		clipp::command("search").set(selected_mode, mode::search),
 		clipp::option("-d", "--disas").set(disassemble).doc("attempt to disassemble the hex string"),
-		clipp::option("-32").set(disas_32bit_mode).doc("enable 32-bit mode"),
-		clipp::value("hex string", hex_string).doc("search for a hex string in the binary")
+		clipp::value("hex", hex_string).doc("search for a hex string in the binary")
 	);
 
 	auto patch_mode = (
 		clipp::command("patch").set(selected_mode, mode::patch),
-		clipp::value("subst file", subst_file_path).doc("subst file to use for patching")
+		clipp::option("-f").set(overwrite_patched_file).doc("overwrite a patched file if one already exists"),
+		clipp::value("subst file", subst_file_path).doc("path to a subst file to use for patching")
 	);
 
 	auto cli = (
 		(search_mode | patch_mode),
-		clipp::value("binary file", binary_file_path)
+		clipp::option("-32").set(disas_32bit_mode).doc("enable 32-bit mode"),
+		clipp::value("binary", binary_file_path).doc("path to a binary file to patch or query")
 	);
 
 	if (!clipp::parse(argc, argv, cli))
@@ -71,19 +78,51 @@ int main(int argc, char** argv)
 		{
 			if (disassemble)
 			{
-				std::vector<u8> bytes = hex_str_to_int(hex_string);
-				disasm_bytes(bytes, 0x0, disas_32bit_mode);
+				std::vector<u8> bytes = subst::hex_str_to_int(hex_string);
+				subst::disasm_bytes(bytes, 0x0, disas_32bit_mode);
 
 				std::cout << "\nLocations:\n";
 			}
 
-			std::vector<size_t> locations = search_bytes(binary_data, hex_string);
-			print_hex_vec(locations);
+			std::vector<size_t> locations = subst::search_bytes(binary_data, hex_string);
+			subst::print_hex_vec(locations);
 			break;
 		}
 
 		case mode::patch:
 		{
+			const std::string patched_file_path = binary_file_path + ".patched";
+
+			if (std::filesystem::exists(patched_file_path) && !overwrite_patched_file)
+			{
+				std::cout	<< "A patched file already exists at " << patched_file_path << '\n'
+							<< "Overwrite the file? (y/n): ";
+
+				char answer;
+				std::cin >> answer;
+
+				switch (answer)
+				{
+					case 'y':
+					case 'Y':
+						break;
+
+					default:
+						return 0;
+				}
+			}
+
+			// Make sure that we are not writing over an existing patched file
+			std::filesystem::remove(patched_file_path);
+
+			std::vector<subst::subst_cmd> subst_commands = subst::parse_subst_file(subst_file_path);
+			subst::patch_bytes(binary_data, subst_commands, disas_32bit_mode);
+
+			// Write the patched binary data into a new file
+			std::ofstream patched_file(patched_file_path, std::ios::app);
+
+			for (u8 byte : binary_data)
+				patched_file.write(reinterpret_cast<char*>(&byte), sizeof(u8));
 
 			break;
 		}

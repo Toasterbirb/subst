@@ -21,4 +21,11 @@ file(GLOB SRC_FILES ./src/*.cpp)
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 target_link_libraries(${PROJECT_NAME} clipp capstone)
 
+# Build tests
+add_executable(pass_check ./tests/pass_check.c)
+target_compile_options(pass_check PUBLIC -O0)
+set(TEST_FILES ./tests/test.sh ./tests/pass_check.subst)
+file(COPY ${TEST_FILES} DESTINATION ./)
+add_custom_target(test DEPENDS pass_check ${PROJECT_NAME} COMMAND ./test.sh)
+
 install(TARGETS ${PROJECT_NAME})
