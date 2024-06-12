@@ -115,7 +115,8 @@ int main(int argc, char** argv)
 			// Make sure that we are not writing over an existing patched file
 			std::filesystem::remove(patched_file_path);
 
-			std::vector<subst::subst_cmd> subst_commands = subst::parse_subst_file(subst_file_path);
+			std::vector<std::string> subst_file_lines = subst::read_file(subst_file_path);
+			std::vector<subst::subst_cmd> subst_commands = subst::parse_subst(subst_file_lines);
 			subst::patch_bytes(binary_data, subst_commands, disas_32bit_mode);
 
 			// Write the patched binary data into a new file
