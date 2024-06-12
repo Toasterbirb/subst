@@ -1,9 +1,14 @@
 #!/bin/bash
 
-readonly SUBST_FILE_PATH="./pass_check.sbst"
+readonly TEST_PROGRAM_SUBST_FILE_PATH="./pass_check.sbst"
 readonly TEST_PROGRAM_PATH="./pass_check"
 readonly TEST_PROGRAM_MD5_CHECKSUM="4af65211188a58effc2035942d4c6743"
 readonly PATCHED_TEST_PROGRAM_PATH="./pass_check.patched"
+
+readonly COMPARISON_PROGRAM_SUBST_FILE_PATH="./comparison.sbst"
+readonly COMPARISON_PROGRAM_PATH="./comparison"
+readonly COMPARISON_PROGRAM_MD5_CHECKSUM="ba1f05d713beecb408aaafb73c5d54f9"
+readonly PATCHED_COMPARISON_PROGRAM_PATH="./comparison.patched"
 
 if [ ! -f "$TEST_PROGRAM_PATH" ]
 then
@@ -17,7 +22,7 @@ then
 fi
 
 # Patch the program
-./subst patch  -f "$SUBST_FILE_PATH" "$TEST_PROGRAM_PATH"
+./subst patch  -f "$TEST_PROGRAM_SUBST_FILE_PATH" "$TEST_PROGRAM_PATH"
 
 if [ ! -f "$PATCHED_TEST_PROGRAM_PATH" ]
 then
@@ -33,6 +38,32 @@ OUTPUT=$($PATCHED_TEST_PROGRAM_PATH)
 RETURN_VALUE=$?
 
 if [ "$OUTPUT" != "correct password: 5" ]
+then
+	echo "Incorrect test output: $OUTPUT"
+	exit 1
+fi
+
+if [ $RETURN_VALUE -ne 0 ]
+then
+	echo "Incorrect return value: $RETURN_VALUE"
+	exit 1
+fi
+
+# Patch the comparison program
+./subst patch -f "$COMPARISON_PROGRAM_SUBST_FILE_PATH" "$COMPARISON_PROGRAM_PATH"
+
+if [ ! -f "$PATCHED_COMPARISON_PROGRAM_PATH" ]
+then
+	echo "The patche version of the comparison test file is missing"
+	exit 2
+fi
+
+chmod +x "$PATCHED_COMPARISON_PROGRAM_PATH"
+
+OUTPUT="$($PATCHED_COMPARISON_PROGRAM_PATH a b c)"
+RETURN_VALUE=$?
+
+if [ "$OUTPUT" != "Correct!" ]
 then
 	echo "Incorrect test output: $OUTPUT"
 	exit 1

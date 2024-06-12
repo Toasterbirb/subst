@@ -257,7 +257,18 @@ namespace subst
 					if (instruction_count > 0)
 					{
 						// Only check the first instruction since that is supposed to be a conditional
-						mnemonic conditional = str_to_mnemonic.at(insn[0].mnemonic);
+						mnemonic conditional;
+
+						try
+						{
+							conditional = str_to_mnemonic.at(insn[0].mnemonic);
+						}
+						catch (std::exception e)
+						{
+							std::cout << "error! unimplemented conditional inversion: " << insn[0].mnemonic << '\n';
+							exit(5);
+						}
+
 
 						const auto log_invert = [cmd](const std::string& left_operand, const std::string& right_operand)
 						{
@@ -266,6 +277,10 @@ namespace subst
 
 						constexpr u8 is_equal = 0x75;
 						constexpr u8 not_equal = 0x74;
+						constexpr u8 less_than_or_equal = 0x7e;
+						constexpr u8 greater_than_or_equal = 0x7d;
+						constexpr u8 less_than = 0x7c;
+						constexpr u8 greater_than = 0x7f;
 
 						switch (conditional)
 						{
@@ -289,8 +304,24 @@ namespace subst
 								bytes[cmd.location] = not_equal;
 								break;
 
-							default:
-								std::cout << "unhandled conditional inversion: " << insn[0].mnemonic << '\n';
+							case mnemonic::jle:
+								log_invert(mnemonic_str::jle, mnemonic_str::jge);
+								bytes[cmd.location] = greater_than_or_equal;
+								break;
+
+							case mnemonic::jge:
+								log_invert(mnemonic_str::jge, mnemonic_str::jle);
+								bytes[cmd.location] = less_than_or_equal;
+								break;
+
+							case mnemonic::jl:
+								log_invert(mnemonic_str::jl, mnemonic_str::jg);
+								bytes[cmd.location] = greater_than;
+								break;
+
+							case mnemonic::jg:
+								log_invert(mnemonic_str::jg, mnemonic_str::jl);
+								bytes[cmd.location] = less_than;
 								break;
 						}
 
