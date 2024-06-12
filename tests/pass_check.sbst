@@ -1,4 +1,4 @@
-# A testing .sbt file for patching the included pass_check program
+# A testing .sbst file for patching the included pass_check program
 # The goal is to make the program output "correct password: 5"
 
 # Bypass the argument count check
