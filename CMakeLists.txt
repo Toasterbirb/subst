@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(subst)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -12,7 +12,13 @@ if(CCACHE_FOUND)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
 endif(CCACHE_FOUND)
 
-include_directories(./include ./vendor)
-add_executable(${PROJECT_NAME} ./src/main.cpp)
+# Compile vendored source code
+add_subdirectory(vendor/clipp)
+include_directories(vendor/clipp/include)
+
+include_directories(./include)
+file(GLOB SRC_FILES ./src/*.cpp)
+add_executable(${PROJECT_NAME} ${SRC_FILES})
+target_link_libraries(${PROJECT_NAME} clipp capstone)
 
 install(TARGETS ${PROJECT_NAME})
