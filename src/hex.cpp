@@ -1,5 +1,6 @@
 #include "Hex.hpp"
 
+#include <algorithm>
 #include <capstone/capstone.h>
 #include <cstdlib>
 #include <iomanip>
@@ -9,13 +10,11 @@ std::vector<u8> hex_str_to_int(std::string hex_string)
 {
 	std::vector<u8> hex_values;
 
+	// Remove all whitespace from the hex string
+	hex_string.erase(std::remove(hex_string.begin(), hex_string.end(), ' '), hex_string.end());
+
 	while (!hex_string.empty())
 	{
-		// Remove any whitespace if there's some at the beginning
-		size_t first_non_whitespace_char = hex_string.find_first_not_of(' ');
-		if (first_non_whitespace_char != std::string::npos)
-			hex_string = hex_string.erase(0, first_non_whitespace_char);
-
 		try
 		{
 			u8 byte = std::stoi(hex_string.substr(0, 2), 0, 16);
