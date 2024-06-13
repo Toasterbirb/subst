@@ -117,6 +117,8 @@ namespace subst
 					if (instruction_count > 0)
 					{
 						// Patch out whatever the first mnemonic is at the given location
+						std::cout << "patching out a " << insn[0].mnemonic << " instruction at 0x" << std::hex << cmd.location << '\n';
+
 						for (u16 i = 0; i < insn[0].size; ++i)
 							bytes[cmd.location + i] = NOP;
 
