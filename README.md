@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 	return 0;
 }
 ```
-What argument would you have to give to the program to get the winning output? If you answer is "I don't know", we can fix that problem with `subst`.
+What argument would you have to give to the program to get the winning output? If your answer is "I don't know", we can fix that problem with `subst`.
 
 The main function of the "impossible" program looks like this in radare:
 ```
