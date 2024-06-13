@@ -12,11 +12,13 @@ nopi ; location                                 # NOP out an instruction at the 
 nopi ; location ; amount_of_bytes_to_nop        # NOP out a certain amount of instruction at the given location
 inv ; location									# Invert a conditional at the given location
 ```
+A few example files can be found in the tests directory
 
 ## Building
 
 ### External dependencies
 - capstone
+- doctest
 
 Build the project with cmake by running the following commands
 ```sh
