@@ -123,18 +123,21 @@ namespace subst
 			CHECK(commands[0].bytes == std::vector<u8>{ 0x7f, 0x45, 0x4c, 0x46 });
 			CHECK(commands[0].replacement_bytes == std::vector<u8>{ 0x02, 0x01, 0x01, 0x03 });
 			CHECK(commands[0].location == 0);
+			CHECK(commands[0].destination == 0);
 			CHECK(commands[0].count == 0);
 
 			CHECK(commands[1].mode == subst_cmd::mode::rep);
 			CHECK(commands[1].bytes == std::vector<u8>{ 0x02, 0x01, 0x01, 0x03 });
 			CHECK(commands[1].replacement_bytes == std::vector<u8>{ 0x00, 0x00, 0x00, 0x00 });
 			CHECK(commands[1].location == 0);
+			CHECK(commands[1].destination == 0);
 			CHECK(commands[1].count == 0);
 
 			CHECK(commands[2].mode == subst_cmd::mode::rep);
 			CHECK(commands[2].bytes == std::vector<u8>{ 0x1 });
 			CHECK(commands[2].replacement_bytes == std::vector<u8>{ 0x1 });
 			CHECK(commands[2].location == 0);
+			CHECK(commands[2].destination == 0);
 			CHECK(commands[2].count == 0);
 		}
 
@@ -152,12 +155,14 @@ namespace subst
 			CHECK(commands[0].bytes.empty());
 			CHECK(commands[0].replacement_bytes == std::vector<u8>{ 0x01, 0x03 });
 			CHECK(commands[0].location == 0x52);
+			CHECK(commands[0].destination == 0);
 			CHECK(commands[0].count == 0);
 
 			CHECK(commands[1].mode == subst_cmd::mode::repat);
 			CHECK(commands[1].bytes.empty());
 			CHECK(commands[1].replacement_bytes == std::vector<u8>{ 0x00, 0x00, 0x00, 0x00 });
 			CHECK(commands[1].location == 0x1);
+			CHECK(commands[1].destination == 0);
 			CHECK(commands[1].count == 0);
 		}
 
@@ -177,24 +182,28 @@ namespace subst
 			CHECK(commands[0].bytes == std::vector<u8>{ 0x7f, 0x45, 0x4c, 0x46 });
 			CHECK(commands[0].replacement_bytes.empty());
 			CHECK(commands[0].location == 0);
+			CHECK(commands[0].destination == 0);
 			CHECK(commands[0].count == 0);
 
 			CHECK(commands[1].mode == subst_cmd::mode::nop);
 			CHECK(commands[1].bytes == std::vector<u8>{ 0x01, 0x03, 0x00, 0x00 });
 			CHECK(commands[1].replacement_bytes.empty());
 			CHECK(commands[1].location == 0);
+			CHECK(commands[1].destination == 0);
 			CHECK(commands[1].count == 0);
 
 			CHECK(commands[2].mode == subst_cmd::mode::nop);
 			CHECK(commands[2].bytes.empty());
 			CHECK(commands[2].replacement_bytes.empty());
 			CHECK(commands[2].location == 0x5);
+			CHECK(commands[2].destination == 0);
 			CHECK(commands[2].count == 8);
 
 			CHECK(commands[3].mode == subst_cmd::mode::nop);
 			CHECK(commands[3].bytes.empty());
 			CHECK(commands[3].replacement_bytes.empty());
 			CHECK(commands[3].location == 0);
+			CHECK(commands[3].destination == 0);
 			CHECK(commands[3].count == 0);
 		}
 
@@ -212,12 +221,14 @@ namespace subst
 			CHECK(commands[0].bytes.empty());
 			CHECK(commands[0].replacement_bytes.empty());
 			CHECK(commands[0].location == 0x2);
+			CHECK(commands[0].destination == 0);
 			CHECK(commands[0].count == 1);
 
 			CHECK(commands[1].mode == subst_cmd::mode::nopi);
 			CHECK(commands[1].bytes.empty());
 			CHECK(commands[1].replacement_bytes.empty());
 			CHECK(commands[1].location == 0x6);
+			CHECK(commands[1].destination == 0);
 			CHECK(commands[1].count == 4);
 		}
 
@@ -235,12 +246,39 @@ namespace subst
 			CHECK(commands[0].bytes.empty());
 			CHECK(commands[0].replacement_bytes.empty());
 			CHECK(commands[0].location == 0x2);
+			CHECK(commands[0].destination == 0);
 			CHECK(commands[0].count == 0);
 
 			CHECK(commands[1].mode == subst_cmd::mode::inv);
 			CHECK(commands[1].bytes.empty());
 			CHECK(commands[1].replacement_bytes.empty());
 			CHECK(commands[1].location == 0xaaaa);
+			CHECK(commands[1].destination == 0);
+			CHECK(commands[1].count == 0);
+		}
+
+		SUBCASE("jmp")
+		{
+			std::vector<std::string> subst = {
+				"jmp ; 0x3 ; 0x16",
+				"jmp ; 0x32 ; 0x0"
+			};
+
+			std::vector<subst::subst_cmd> commands = subst::parse_subst(subst);
+			CHECK(commands.size() == 2);
+
+			CHECK(commands[0].mode == subst_cmd::mode::jmp);
+			CHECK(commands[0].bytes.empty());
+			CHECK(commands[0].replacement_bytes.empty());
+			CHECK(commands[0].location == 0x3);
+			CHECK(commands[0].destination == 0x16);
+			CHECK(commands[0].count == 0);
+
+			CHECK(commands[1].mode == subst_cmd::mode::jmp);
+			CHECK(commands[1].bytes.empty());
+			CHECK(commands[1].replacement_bytes.empty());
+			CHECK(commands[1].location == 0x32);
+			CHECK(commands[1].destination == 0x0);
 			CHECK(commands[1].count == 0);
 		}
 	}
@@ -332,6 +370,21 @@ namespace subst
 				}
 
 				cmd.location = std::stoi(tokens[1], 0, 16);
+
+				break;
+			}
+
+			// jmp ; location ; destination
+			case subst_cmd::mode::jmp:
+			{
+				if (tokens.size() != 3)
+				{
+					std::cout << "invalid jump: " << original_line << '\n';
+					exit(1);
+				}
+
+				cmd.location = std::stoi(tokens[1], 0, 16);
+				cmd.destination = std::stoi(tokens[2], 0, 16);
 
 				break;
 			}

@@ -12,7 +12,7 @@ namespace subst
 	{
 		enum class mode
 		{
-			rep, repat, nop, nopi, inv
+			rep, repat, nop, nopi, inv, jmp
 		};
 
 		// string to mode mappings
@@ -22,6 +22,7 @@ namespace subst
 			{ "nop", mode::nop },
 			{ "nopi", mode::nopi },
 			{ "inv", mode::inv},
+			{ "jmp", mode::jmp },
 		};
 
 		mode mode;
@@ -29,6 +30,7 @@ namespace subst
 		std::vector<u8> bytes;
 		std::vector<u8> replacement_bytes;
 		u64 location{};
+		u64 destination{};
 		u64 count{};
 	};
 
