@@ -198,6 +198,22 @@ namespace subst
 			CHECK(commands[3].count == 0);
 		}
 
+		SUBCASE("nopm")
+		{
+			std::vector<std::string> subst = {
+				"nopm ; 0x2"
+			};
+
+			std::vector<subst_cmd> commands = subst::parse_subst(subst);
+			CHECK(commands.size() == 1);
+
+			CHECK(commands[0].mode == subst_cmd::mode::nopm);
+			CHECK(commands[0].bytes.empty());
+			CHECK(commands[0].replacement_bytes.empty());
+			CHECK(commands[0].location == 0x2);
+			CHECK(commands[0].count == 0);
+		}
+
 		SUBCASE("inv")
 		{
 			std::vector<std::string> subst = {
@@ -276,6 +292,19 @@ namespace subst
 					std::cout << "invalid NOP replacement: " << original_line << '\n';
 					exit(1);
 				}
+
+				break;
+			}
+
+			case subst_cmd::mode::nopm:
+			{
+				if (tokens.size() != 2)
+				{
+					std::cout << "invalid mnemonic nop: " << original_line << "\n";
+					exit(1);
+				}
+
+				cmd.location = std::stoi(tokens[1], 0, 16);
 
 				break;
 			}

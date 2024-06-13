@@ -8,6 +8,7 @@ rep ; bytes ; replacement_bytes					# Replace all instances of the byte array wi
 repat ; location ; replacement_bytes			# Replace bytes at the given location with the given bytes
 nop ; bytes										# NOP all instances of the given byte array
 nop ; location ; amount_of_bytes_to_replace		# Replace a certain amount of bytes with NOP starting from the given location
+nopm ; location                                 # NOP out a mnemonic at the given location
 inv ; location									# Invert a conditional at the given location
 ```
 

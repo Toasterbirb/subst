@@ -14,6 +14,8 @@ namespace subst
 {
 	void patch_bytes(std::vector<u8>& bytes, const std::vector<subst_cmd>& commands, bool x86_32bit_mode)
 	{
+		constexpr u8 NOP = 0x90;
+
 		for (const subst_cmd& cmd : commands)
 		{
 			switch (cmd.mode)
@@ -59,8 +61,6 @@ namespace subst
 
 				case subst_cmd::mode::nop:
 				{
-					constexpr u8 NOP = 0x90;
-
 					// If count is not set, replace all instances of the byte array in
 					// the file with NOPs
 					if (cmd.count == 0)
@@ -90,6 +90,44 @@ namespace subst
 							bytes[i] = NOP;
 					}
 
+					break;
+				}
+
+				case subst_cmd::mode::nopm:
+				{
+					// NOP out a mnemonic
+					constexpr u8 disassembled_byte_count = 24;
+					assert(bytes.size() >= disassembled_byte_count);
+					std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
+
+					csh handle;
+					cs_insn* insn;
+
+					cs_mode capstone_mode = CS_MODE_64;
+					if (x86_32bit_mode)
+						capstone_mode = CS_MODE_32;
+
+					if (cs_open(CS_ARCH_X86, capstone_mode, &handle) != CS_ERR_OK)
+					{
+						std::cout << "couldn't initialize capstone\n";
+						return;
+					}
+
+					size_t instruction_count = cs_disasm(handle, bytes_to_disassemble.data(), bytes_to_disassemble.size(), cmd.location, 0, &insn);
+					if (instruction_count > 0)
+					{
+						// Patch out whatever the first mnemonic is at the given location
+						for (u16 i = 0; i < insn[0].size; ++i)
+							bytes[cmd.location + i] = NOP;
+
+						cs_free(insn, instruction_count);
+					}
+					else
+					{
+						std::cout << "instruction to NOP could not be found\n";
+					}
+
+					cs_close(&handle);
 					break;
 				}
 
@@ -202,40 +240,75 @@ namespace subst
 
 	TEST_CASE("patch bytes")
 	{
-		std::vector<u8> bytes = {
-			0x7F, 0x45, 0x4C, 0x46,
-			0x02, 0x01, 0x01, 0x00,
-			0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00,
-			0x03, 0x00, 0x3E, 0x00,
-			0x01, 0x00, 0x00, 0x00,
-			0x90, 0x10, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00
-		};
+		SUBCASE("generic patching")
+		{
+			std::vector<u8> bytes = {
+				0x7F, 0x45, 0x4C, 0x46,
+				0x02, 0x01, 0x01, 0x00,
+				0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00,
+				0x03, 0x00, 0x3E, 0x00,
+				0x01, 0x00, 0x00, 0x00,
+				0x90, 0x10, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00
+			};
 
-		const u32 original_bytes_count = bytes.size();
+			const u32 original_bytes_count = bytes.size();
 
-		std::vector<std::string> subst = {
-			"rep ; 7F 45 4C 46 ; 00 00 00 00",
-			"nop ; 0x4 ; 4",
-			"repat ; 0x8 ; 12 34 56 78",
-			"nop ; 03 00 3E 00"
-		};
+			std::vector<std::string> subst = {
+				"rep ; 7F 45 4C 46 ; 00 00 00 00",
+				"nop ; 0x4 ; 4",
+				"repat ; 0x8 ; 12 34 56 78",
+				"nop ; 03 00 3E 00"
+			};
 
-		std::vector<subst_cmd> commands = subst::parse_subst(subst);
-		patch_bytes(bytes, commands, false);
+			std::vector<subst_cmd> commands = subst::parse_subst(subst);
+			patch_bytes(bytes, commands, false);
 
-		const std::vector<u8> patched_bytes = {
-			0x00, 0x00, 0x00, 0x00,
-			0x90, 0x90, 0x90, 0x90,
-			0x12, 0x34, 0x56, 0x78,
-			0x00, 0x00, 0x00, 0x00,
-			0x90, 0x90, 0x90, 0x90,
-			0x01, 0x00, 0x00, 0x00,
-			0x90, 0x10, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00
-		};
+			const std::vector<u8> patched_bytes = {
+				0x00, 0x00, 0x00, 0x00,
+				0x90, 0x90, 0x90, 0x90,
+				0x12, 0x34, 0x56, 0x78,
+				0x00, 0x00, 0x00, 0x00,
+				0x90, 0x90, 0x90, 0x90,
+				0x01, 0x00, 0x00, 0x00,
+				0x90, 0x10, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00
+			};
 
-		CHECK(bytes == patched_bytes);
+			CHECK(bytes == patched_bytes);
+		}
+
+		SUBCASE("patch out a function call")
+		{
+			std::vector<u8> bytes = {
+				0x48, 0x89, 0xc7,
+				0xe8, 0x6b, 0xfe, 0xff, 0xff, // This line should get patched out with NOP
+				0x48, 0x89, 0x45, 0xf8,
+				0x48, 0x8d, 0x05, 0x3d, 0x0c, 0x00,
+				0x48, 0x89, 0x45, 0xf0,
+				0x48, 0x8b, 0x45, 0xc0,
+			};
+
+			const u32 original_bytes_count = bytes.size();
+
+			std::vector<std::string> subst = {
+				"nopm ; 0x3"
+			};
+
+			std::vector<subst_cmd> commands = subst::parse_subst(subst);
+			patch_bytes(bytes, commands, false);
+
+			const std::vector<u8> patched_bytes = {
+				0x48, 0x89, 0xc7,
+				0x90, 0x90, 0x90, 0x90, 0x90,
+				0x48, 0x89, 0x45, 0xf8,
+				0x48, 0x8d, 0x05, 0x3d, 0x0c, 0x00,
+				0x48, 0x89, 0x45, 0xf0,
+				0x48, 0x8b, 0x45, 0xc0,
+			};
+
+			CHECK(bytes == patched_bytes);
+		}
 	}
 }

@@ -12,7 +12,7 @@ namespace subst
 	{
 		enum class mode
 		{
-			rep, repat, nop, inv
+			rep, repat, nop, nopm, inv
 		};
 
 		// string to mode mappings
@@ -20,6 +20,7 @@ namespace subst
 			{ "rep", mode::rep },
 			{ "repat", mode::repat },
 			{ "nop", mode::nop },
+			{ "nopm", mode::nopm },
 			{ "inv", mode::inv},
 		};
 
