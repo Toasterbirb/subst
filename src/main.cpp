@@ -15,6 +15,8 @@
 #include <iostream>
 #include <stdio.h>
 
+static constexpr char subst_file_extension[] = "sbst";
+
 int main(int argc, char** argv)
 {
 	enum class mode { search, patch, test, help };
@@ -41,7 +43,7 @@ int main(int argc, char** argv)
 	auto patch_mode = (
 		clipp::command("patch").set(selected_mode, mode::patch).doc("patch the binary"),
 		clipp::option("-f").set(overwrite_patched_file).doc("overwrite a patched file if one already exists"),
-		clipp::value("subst file", subst_file_path).doc("path to a subst file to use for patching"),
+		clipp::option("-s").doc("custom subst file") & clipp::value("subst file", subst_file_path).doc("path to a subst file to use for patching"),
 		clipp::value("binary", binary_file_path).doc("path to a binary file to patch or query")
 	);
 
@@ -126,6 +128,10 @@ int main(int argc, char** argv)
 
 			// Make sure that we are not writing over an existing patched file
 			std::filesystem::remove(patched_file_path);
+
+			// If the subst file path has not been set, assume it to be <binary_path>.<subst_extension>
+			if (subst_file_path.empty())
+				subst_file_path = binary_file_path + "." + subst_file_extension;
 
 			std::vector<std::string> subst_file_lines = subst::read_file(subst_file_path);
 			std::vector<subst::subst_cmd> subst_commands = subst::parse_subst(subst_file_lines);

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-readonly TEST_PROGRAM_SUBST_FILE_PATH="./pass_check.sbst"
 readonly TEST_PROGRAM_PATH="./pass_check"
 readonly TEST_PROGRAM_MD5_CHECKSUM="4af65211188a58effc2035942d4c6743"
 readonly PATCHED_TEST_PROGRAM_PATH="./pass_check.patched"
@@ -22,7 +21,7 @@ then
 fi
 
 # Patch the program
-./subst patch  -f "$TEST_PROGRAM_SUBST_FILE_PATH" "$TEST_PROGRAM_PATH"
+./subst patch -f "$TEST_PROGRAM_PATH"
 
 if [ ! -f "$PATCHED_TEST_PROGRAM_PATH" ]
 then
@@ -55,7 +54,7 @@ then
 fi
 
 # Patch the comparison program
-./subst patch -f "$COMPARISON_PROGRAM_SUBST_FILE_PATH" "$COMPARISON_PROGRAM_PATH"
+./subst patch -f -s "$COMPARISON_PROGRAM_SUBST_FILE_PATH" "$COMPARISON_PROGRAM_PATH"
 
 if [ ! -f "$PATCHED_COMPARISON_PROGRAM_PATH" ]
 then
