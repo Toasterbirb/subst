@@ -116,11 +116,18 @@ namespace subst
 					size_t instruction_count = cs_disasm(handle, bytes_to_disassemble.data(), bytes_to_disassemble.size(), cmd.location, 0, &insn);
 					if (instruction_count > 0)
 					{
-						// Patch out whatever the first mnemonic is at the given location
-						std::cout << "patching out a " << insn[0].mnemonic << " instruction at 0x" << std::hex << cmd.location << '\n';
+						// Patch out whatever the first instruction is at the given location
+						// (or multiple instructions starting from the location if the count > 1)
 
-						for (u16 i = 0; i < insn[0].size; ++i)
-							bytes[cmd.location + i] = NOP;
+						u64 location_offset = 0;
+						for (u64 i = 0; i < cmd.count; ++i)
+						{
+							std::cout << "patching out a " << insn[i].mnemonic << " instruction at 0x" << std::hex << cmd.location + location_offset << '\n';
+							for (u16 j = 0; j < insn[i].size; ++j)
+								bytes[cmd.location + j + location_offset] = NOP;
+
+							location_offset += insn[i].size;
+						}
 
 						cs_free(insn, instruction_count);
 					}
@@ -311,6 +318,39 @@ namespace subst
 			};
 
 			CHECK(bytes == patched_bytes);
+		}
+
+		SUBCASE("patch out multiple instructions at once")
+		{
+			std::vector<u8> bytes = {
+				0x48, 0x89, 0xc7,
+				0xe8, 0x6b, 0xfe, 0xff, 0xff, // This line should get patched out with NOP
+				0x48, 0x89, 0x45, 0xf8, // This line should get patched out with NOP
+				0x48, 0x8d, 0x05, 0x3d, 0x0c, 0x00,
+				0x48, 0x89, 0x45, 0xf0,
+				0x48, 0x8b, 0x45, 0xc0,
+			};
+
+			const u32 original_bytes_count = bytes.size();
+
+			std::vector<std::string> subst = {
+				"nopi ; 0x3 ; 2"
+			};
+
+			std::vector<subst_cmd> commands = subst::parse_subst(subst);
+			patch_bytes(bytes, commands, false);
+
+			const std::vector<u8> patched_bytes = {
+				0x48, 0x89, 0xc7,
+				0x90, 0x90, 0x90, 0x90, 0x90,
+				0x90, 0x90, 0x90, 0x90,
+				0x48, 0x8d, 0x05, 0x3d, 0x0c, 0x00,
+				0x48, 0x89, 0x45, 0xf0,
+				0x48, 0x8b, 0x45, 0xc0,
+			};
+
+			CHECK(bytes == patched_bytes);
+
 		}
 	}
 }

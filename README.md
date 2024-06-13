@@ -9,6 +9,7 @@ repat ; location ; replacement_bytes			# Replace bytes at the given location wit
 nop ; bytes										# NOP all instances of the given byte array
 nop ; location ; amount_of_bytes_to_replace		# Replace a certain amount of bytes with NOP starting from the given location
 nopi ; location                                 # NOP out an instruction at the given location
+nopi ; location ; amount_of_bytes_to_nop        # NOP out a certain amount of instruction at the given location
 inv ; location									# Invert a conditional at the given location
 ```
 

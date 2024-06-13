@@ -201,17 +201,24 @@ namespace subst
 		SUBCASE("nopi")
 		{
 			std::vector<std::string> subst = {
-				"nopi ; 0x2"
+				"nopi ; 0x2",
+				"nopi ; 0x6 ; 4"
 			};
 
 			std::vector<subst_cmd> commands = subst::parse_subst(subst);
-			CHECK(commands.size() == 1);
+			CHECK(commands.size() == 2);
 
 			CHECK(commands[0].mode == subst_cmd::mode::nopi);
 			CHECK(commands[0].bytes.empty());
 			CHECK(commands[0].replacement_bytes.empty());
 			CHECK(commands[0].location == 0x2);
-			CHECK(commands[0].count == 0);
+			CHECK(commands[0].count == 1);
+
+			CHECK(commands[1].mode == subst_cmd::mode::nopi);
+			CHECK(commands[1].bytes.empty());
+			CHECK(commands[1].replacement_bytes.empty());
+			CHECK(commands[1].location == 0x6);
+			CHECK(commands[1].count == 4);
 		}
 
 		SUBCASE("inv")
@@ -298,13 +305,19 @@ namespace subst
 
 			case subst_cmd::mode::nopi:
 			{
-				if (tokens.size() != 2)
+				if (tokens.size() > 3)
 				{
 					std::cout << "invalid mnemonic nop: " << original_line << "\n";
 					exit(1);
 				}
 
+				// by default: nopi ; location
 				cmd.location = std::stoi(tokens[1], 0, 16);
+				cmd.count = 1;
+
+				// if 3 tokens: nopi ; location ; amount_of_bytes_to_nop
+				if (tokens.size() == 3)
+					cmd.count = std::stoi(tokens[2]);
 
 				break;
 			}
