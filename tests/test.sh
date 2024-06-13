@@ -49,6 +49,11 @@ then
 	exit 1
 fi
 
+if [ "$(md5sum $COMPARISON_PROGRAM_PATH | cut -d ' ' -f 1)" != "$COMPARISON_PROGRAM_MD5_CHECKSUM" ]
+then
+	echo "WARNING: The checksum of the test program does not match. The tests might not work as intended."
+fi
+
 # Patch the comparison program
 ./subst patch -f "$COMPARISON_PROGRAM_SUBST_FILE_PATH" "$COMPARISON_PROGRAM_PATH"
 
