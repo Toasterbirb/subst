@@ -75,4 +75,8 @@ then
 	exit 1
 fi
 
+# Run doctest unit tests
+set -e
+./subst test
+
 echo "Test passed successfully!"

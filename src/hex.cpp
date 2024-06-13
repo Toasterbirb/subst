@@ -2,6 +2,7 @@
 
 #include <capstone/capstone.h>
 #include <cstdlib>
+#include <doctest/doctest.h>
 #include <iomanip>
 #include <iostream>
 #include <regex>
@@ -23,7 +24,13 @@ namespace subst
 		{
 			try
 			{
-				u8 byte = std::stoi(hex_string.substr(0, 2), 0, 16);
+				u8 byte = 0;
+
+				if (hex_string.size() != 1)
+					byte = std::stoi(hex_string.substr(0, 2), 0, 16);
+				else
+					byte = std::stoi(hex_string.substr(0, 1), 0, 16);
+
 				hex_values.emplace_back(byte);
 			}
 			catch (std::exception e)
@@ -37,6 +44,20 @@ namespace subst
 		}
 
 		return hex_values;
+	}
+
+	TEST_CASE("hex_str_to_bytes")
+	{
+		CHECK(hex_str_to_bytes("0") == std::vector<u8>{ 0x0 });
+		CHECK(hex_str_to_bytes("1") == std::vector<u8>{ 0x1 });
+		CHECK(hex_str_to_bytes("7f45") == std::vector<u8>{ 0x7f, 0x45 });
+		CHECK(hex_str_to_bytes("7f45 4c46") == std::vector<u8> { 0x7f, 0x45, 0x4c, 0x46 });
+		CHECK(hex_str_to_bytes("7f 45 4c 46") == std::vector<u8>{ 0x7f, 0x45, 0x4c, 0x46 });
+		CHECK(hex_str_to_bytes("7f454c46") == std::vector<u8>{ 0x7f, 0x45, 0x4c, 0x46 });
+		CHECK(hex_str_to_bytes("7f454c46020101030000000000000000") == std::vector<u8>{ 0x7f, 0x45, 0x4c, 0x46, 0x02, 0x01, 0x01, 0x03,
+		                                                                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+		CHECK(hex_str_to_bytes("0x7f 0x45 0x4c 0x46") == std::vector<u8>{ 0x7f, 0x45, 0x4c, 0x46 });
+		CHECK(hex_str_to_bytes("0x7f0x450x4c0x46") == std::vector<u8>{ 0x7f, 0x45, 0x4c, 0x46 });
 	}
 
 	void print_bytes(const std::vector<u8>& bytes)
