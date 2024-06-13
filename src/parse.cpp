@@ -53,6 +53,9 @@ namespace subst
 			// Remove all whitespace
 			std::erase(line, ' ');
 
+			// Remove all tab indentation
+			std::erase(line, '\t');
+
 			// Remove comments
 			std::regex comment_pattern("#.*");
 			line = std::regex_replace(line, comment_pattern, "");
