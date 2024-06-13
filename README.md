@@ -128,6 +128,29 @@ toasterbirb@tux /tmp/subst $ ./impossible.patched
 You win!
 toasterbirb@tux /tmp/subst $
 ```
+The patched program looks like this in radare:
+```
+╭ 34: int main (int argc, char **argv, char **envp);
+│           0x00001175      55             push rbp
+│           0x00001176      4889e5         mov rbp, rsp
+│           0x00001179      4883ec20       sub rsp, 0x20
+│       ╭─< 0x0000117d      eb52           jmp 0x11d1
+..
+      │││   ; CODE XREF from main @ +0x13(x)
+      │││   ; CODE XREF from main @ +0x4e(x)
+│     │││   ; CODE XREF from main @ 0x117d(x)
+│     ││╰─> 0x000011d1      488d05500e..   lea rax, str.You_win_       ; 0x2028 ; "You win!"
+│     ││    0x000011d8      4889c7         mov rdi, rax                ; const char *s
+│     ││    0x000011db      e850feffff     call sym.imp.puts           ; int puts(const char *s)
+│     ││╭─< 0x000011e0      eb0f           jmp 0x11f1
+      │││   ; CODE XREF from main @ +0x5a(x)
+..
+│     │ │   ; CODE XREF from main @ 0x11e0(x)
+│     │ ╰─> 0x000011f1      b800000000     mov eax, 0
+│     │     ; CODE XREF from main @ +0x29(x)
+│     ╰───> 0x000011f6      c9             leave
+╰           0x000011f7      c3             ret
+```
 
 In more complicated cases the subst file might be longer. You can have as many commands as you'd like and they are interpreted line by line sequentially. The file format also supports comments with the `#` character. Also all whitespace and tabs get stripped out, so use them freely
 
