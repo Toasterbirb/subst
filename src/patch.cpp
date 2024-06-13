@@ -50,7 +50,7 @@ namespace subst
 
 				case subst_cmd::mode::repat:
 				{
-					std::cout << "replacing " << cmd.replacement_bytes.size() << " bytes at 0x" << std::hex << cmd.location << '\n';
+					std::cout << "replacing " << std::dec << cmd.replacement_bytes.size() << " bytes at 0x" << std::hex << cmd.location << '\n';
 
 					// Replace bytes starting from the given point
 					for (u64 i = cmd.location; i < cmd.location + cmd.replacement_bytes.size() && i < bytes.size(); ++i)
@@ -84,7 +84,7 @@ namespace subst
 					else
 					{
 						// NOP out the given amount of bytes starting from the given location
-						std::cout << "replacing " << cmd.count << " bytes with NOP at 0x" << std::hex << cmd.location << '\n';
+						std::cout << "replacing " << std::dec << cmd.count << " bytes with NOP at 0x" << std::hex << cmd.location << '\n';
 
 						for (size_t i = cmd.location; i < cmd.location + cmd.count && i < bytes.size(); ++i)
 							bytes[i] = NOP;
