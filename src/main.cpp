@@ -143,6 +143,9 @@ int main(int argc, char** argv)
 			for (u8 byte : binary_data)
 				patched_file.write(reinterpret_cast<char*>(&byte), sizeof(u8));
 
+			// Make the patched binary file executable
+			std::filesystem::permissions(patched_file_path, std::filesystem::perms::owner_exec, std::filesystem::perm_options::add);
+
 			break;
 		}
 
