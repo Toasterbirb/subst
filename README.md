@@ -4,14 +4,14 @@ Find hex strings in a binary and replace bytes with an interpreted language. For
 
 ## subst file format
 ```
-rep ; bytes ; replacement_bytes					# Replace all instances of the byte array with the given byte array
-repat ; location ; replacement_bytes			# Replace bytes at the given location with the given bytes
-nop ; bytes										# NOP all instances of the given byte array
-nop ; location ; amount_of_bytes_to_replace		# Replace a certain amount of bytes with NOP starting from the given location
-nopi ; location                                 # NOP out an instruction at the given location
-nopi ; location ; amount_of_bytes_to_nop        # NOP out a certain amount of instruction at the given location
-inv ; location									# Invert a conditional at the given location
-jmp ; location ; destination                    # Create a jmp instruction to the given location that jumps to the destination address
+rep ; bytes ; replacement_bytes              # Replace all instances of the byte array with the given byte array
+repat ; location ; replacement_bytes         # Replace bytes at the given location with the given bytes
+nop ; bytes                                  # NOP all instances of the given byte array
+nop ; location ; amount_of_bytes_to_replace  # Replace a certain amount of bytes with NOP starting from the given location
+nopi ; location                              # NOP out an instruction at the given location
+nopi ; location ; amount_of_bytes_to_nop     # NOP out a certain amount of instruction at the given location
+inv ; location                               # Invert a conditional at the given location
+jmp ; location ; destination                 # Create a jmp instruction to the given location that jumps to the destination address
 ```
 A few example files can be found in the tests directory
 
