@@ -8,7 +8,7 @@ syn match substHex /[A-Za-z0-9]\{2}/
 syn match substSemicolon /;/
 
 syn match substComment /#.*/
-syn keyword substCommand rep repat nop nopm inv
+syn keyword substCommand rep repat nop nopi inv
 
 syn case match
 

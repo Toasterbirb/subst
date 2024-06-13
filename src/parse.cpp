@@ -198,16 +198,16 @@ namespace subst
 			CHECK(commands[3].count == 0);
 		}
 
-		SUBCASE("nopm")
+		SUBCASE("nopi")
 		{
 			std::vector<std::string> subst = {
-				"nopm ; 0x2"
+				"nopi ; 0x2"
 			};
 
 			std::vector<subst_cmd> commands = subst::parse_subst(subst);
 			CHECK(commands.size() == 1);
 
-			CHECK(commands[0].mode == subst_cmd::mode::nopm);
+			CHECK(commands[0].mode == subst_cmd::mode::nopi);
 			CHECK(commands[0].bytes.empty());
 			CHECK(commands[0].replacement_bytes.empty());
 			CHECK(commands[0].location == 0x2);
@@ -296,7 +296,7 @@ namespace subst
 				break;
 			}
 
-			case subst_cmd::mode::nopm:
+			case subst_cmd::mode::nopi:
 			{
 				if (tokens.size() != 2)
 				{

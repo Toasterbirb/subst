@@ -93,7 +93,7 @@ namespace subst
 					break;
 				}
 
-				case subst_cmd::mode::nopm:
+				case subst_cmd::mode::nopi:
 				{
 					// NOP out a mnemonic
 					constexpr u8 disassembled_byte_count = 24;
@@ -295,7 +295,7 @@ namespace subst
 			const u32 original_bytes_count = bytes.size();
 
 			std::vector<std::string> subst = {
-				"nopm ; 0x3"
+				"nopi ; 0x3"
 			};
 
 			std::vector<subst_cmd> commands = subst::parse_subst(subst);
