@@ -30,12 +30,7 @@ namespace subst
 						exit(1);
 					}
 
-					std::cout << "replacing all instances of ";
-					print_bytes(cmd.bytes);
-					std::cout << "with ";
-					print_bytes(cmd.replacement_bytes);
-
-					std::cout << '\n';
+					std::cout << "replacing all instances of " << byte_str(cmd.bytes) << " with " << byte_str(cmd.replacement_bytes) << '\n';
 
 					// Find all locations where the byte array appears at
 					const std::vector<size_t> locations = subst::search_bytes(bytes, cmd.bytes);
@@ -69,9 +64,7 @@ namespace subst
 					{
 						assert(!cmd.bytes.empty());
 
-						std::cout << "replacing all instances of ";
-						print_bytes(cmd.bytes);
-						std::cout << "with NOPs\n";
+						std::cout << "replacing all instances of " << byte_str(cmd.bytes) << " with NOPs\n";
 
 						// Find all locations where the byte array appears at
 						const std::vector<size_t> locations = subst::search_bytes(bytes, cmd.bytes);

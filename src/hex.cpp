@@ -58,10 +58,19 @@ namespace subst
 		CHECK(hex_str_to_bytes("0x7f0x450x4c0x46") == std::vector<u8>{ 0x7f, 0x45, 0x4c, 0x46 });
 	}
 
-	void print_bytes(const std::vector<u8>& bytes)
+	std::string byte_str(const std::vector<u8>& bytes)
 	{
+		std::string str;
+		constexpr size_t size_per_byte = 4;
+		str.resize(bytes.size() * size_per_byte - 1);
+
 		for (size_t i = 0; i < bytes.size(); ++i)
-			printf("%02x ", bytes[i]);
+			snprintf(&str.data()[i * size_per_byte], size_per_byte, "%02x ", bytes[i]);
+
+		// Pop back the last character, as its just a trailing whitespace
+		str.pop_back();
+
+		return str;
 	}
 
 	void disasm_bytes(const std::vector<u8>& bytes, u64 starting_address, bool x86_32bit_mode)

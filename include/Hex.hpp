@@ -17,6 +17,6 @@ namespace subst
 			std::cout << "0x" << std::hex << value << std::dec << '\n';
 	}
 
-	void print_bytes(const std::vector<u8>& bytes);
+	std::string byte_str(const std::vector<u8>& bytes);
 	void disasm_bytes(const std::vector<u8>& bytes, u64 starting_address, bool x86_32bit_mode);
 }
