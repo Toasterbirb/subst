@@ -78,8 +78,7 @@ namespace subst
 			if (tokens.size() <= 1)
 			{
 				std::cout << "invalid line: " << original_line << '\n';
-				commands.clear(); // Wipe the command list so that nothing will be done to the binary
-				return commands;
+				return {}; // Return an empty vector so that nothing will be done to the binary
 			}
 
 			// Parse the tokens
