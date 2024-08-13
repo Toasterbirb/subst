@@ -3,7 +3,6 @@
 #include "Types.hpp"
 
 #include <iostream>
-#include <span>
 #include <string>
 #include <vector>
 
