@@ -23,13 +23,13 @@ namespace subst
 	}
 
 	static const std::unordered_map<std::string, mnemonic> str_to_mnemonic = {
-		{ "je", mnemonic::je },
-		{ "jne", mnemonic::jne },
-		{ "jz", mnemonic::jz },
-		{ "jnz", mnemonic::jnz },
-		{ "jle", mnemonic::jle },
-		{ "jge", mnemonic::jge },
-		{ "jg", mnemonic::jg },
-		{ "jl", mnemonic::jl },
+		{ mnemonic_str::je, mnemonic::je },
+		{ mnemonic_str::jne, mnemonic::jne },
+		{ mnemonic_str::jz, mnemonic::jz },
+		{ mnemonic_str::jnz, mnemonic::jnz },
+		{ mnemonic_str::jle, mnemonic::jle },
+		{ mnemonic_str::jge, mnemonic::jge },
+		{ mnemonic_str::jg, mnemonic::jg },
+		{ mnemonic_str::jl, mnemonic::jl },
 	};
 }
