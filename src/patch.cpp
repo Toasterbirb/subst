@@ -37,7 +37,7 @@ namespace subst
 					std::cout << '\n';
 
 					// Find all locations where the byte array appears at
-					std::vector<size_t> locations = subst::search_bytes(bytes, cmd.bytes);
+					const std::vector<size_t> locations = subst::search_bytes(bytes, cmd.bytes);
 
 					for (size_t location : locations)
 					{
@@ -73,7 +73,7 @@ namespace subst
 						std::cout << "with NOPs\n";
 
 						// Find all locations where the byte array appears at
-						std::vector<size_t> locations = subst::search_bytes(bytes, cmd.bytes);
+						const std::vector<size_t> locations = subst::search_bytes(bytes, cmd.bytes);
 
 						for (size_t location : locations)
 						{
@@ -99,7 +99,7 @@ namespace subst
 					// NOP out a mnemonic
 					constexpr u8 disassembled_byte_count = 24;
 					assert(bytes.size() >= disassembled_byte_count);
-					std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
+					const std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
 
 					csh handle;
 					cs_insn* insn;
@@ -114,7 +114,7 @@ namespace subst
 						return;
 					}
 
-					size_t instruction_count = cs_disasm(handle, bytes_to_disassemble.data(), bytes_to_disassemble.size(), cmd.location, 0, &insn);
+					const size_t instruction_count = cs_disasm(handle, bytes_to_disassemble.data(), bytes_to_disassemble.size(), cmd.location, 0, &insn);
 					if (instruction_count > 0)
 					{
 						// Patch out whatever the first instruction is at the given location
@@ -146,7 +146,7 @@ namespace subst
 					// Disassemble some bytes starting from the given location to figure out
 					// how to invert the conditional (if there even is one)
 					constexpr u8 disassembled_byte_count = 24;
-					std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
+					const std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
 
 					csh handle;
 					cs_insn* insn;
@@ -161,7 +161,7 @@ namespace subst
 						return;
 					}
 
-					size_t instruction_count = cs_disasm(handle, bytes_to_disassemble.data(), bytes_to_disassemble.size(), cmd.location, 0, &insn);
+					const size_t instruction_count = cs_disasm(handle, bytes_to_disassemble.data(), bytes_to_disassemble.size(), cmd.location, 0, &insn);
 					if (instruction_count > 0)
 					{
 						// Only check the first instruction since that is supposed to be a conditional
@@ -251,7 +251,7 @@ namespace subst
 					// If the distance is more than -128 or less than 128, we can do a "short jump" with 8-bit offset
 					// If the distance is longer, we'll do a "near jump" with a 32-bit offset
 
-					i64 distance = static_cast<i64>(cmd.destination) - static_cast<i64>(cmd.location);
+					const i64 distance = static_cast<i64>(cmd.destination) - static_cast<i64>(cmd.location);
 					if (distance - 30 <= 128)
 					{
 						std::cout << "creating a short jump 0x" << std::hex << cmd.location  << " -> 0x" << cmd.destination << std::dec << " (" << std::dec << distance << " bytes)\n";
@@ -267,7 +267,7 @@ namespace subst
 						// Do a near jump
 						bytes[cmd.location] = 0xe9;
 
-						i32 offset_distance = distance - 5;
+						const i32 offset_distance = distance - 5;
 						bytes[cmd.location + 1] = (offset_distance & 0x000000ffUL);
 						bytes[cmd.location + 2] = (offset_distance & 0x0000ff00UL) >> 8;
 						bytes[cmd.location + 3] = (offset_distance & 0x00ff0000UL) >> 16;

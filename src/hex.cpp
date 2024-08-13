@@ -17,19 +17,16 @@ namespace subst
 		std::erase(hex_string, ' ');
 
 		// Remove all instances of "0x" from the string
-		std::regex zero_x_pattern("0x");
+		const std::regex zero_x_pattern("0x");
 		hex_string = std::regex_replace(hex_string, zero_x_pattern, "");
 
 		while (!hex_string.empty())
 		{
 			try
 			{
-				u8 byte = 0;
-
-				if (hex_string.size() != 1)
-					byte = std::stoi(hex_string.substr(0, 2), 0, 16);
-				else
-					byte = std::stoi(hex_string.substr(0, 1), 0, 16);
+				const u8 byte = hex_string.size() != 1
+					? std::stoi(hex_string.substr(0, 2), 0, 16)
+					: std::stoi(hex_string.substr(0, 1), 0, 16);
 
 				hex_values.emplace_back(byte);
 			}
@@ -81,7 +78,7 @@ namespace subst
 			return;
 		}
 
-		size_t instruction_count = cs_disasm(handle, bytes.data(), bytes.size(), 0x0, 0, &insn);
+		const size_t instruction_count = cs_disasm(handle, bytes.data(), bytes.size(), 0x0, 0, &insn);
 		if (instruction_count > 0)
 		{
 			constexpr u8 bytes_per_instruction = 24;

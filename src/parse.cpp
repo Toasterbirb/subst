@@ -58,7 +58,7 @@ namespace subst
 			std::erase(line, '\t');
 
 			// Remove comments
-			std::regex comment_pattern("#.*");
+			const std::regex comment_pattern("#.*");
 			line = std::regex_replace(line, comment_pattern, "");
 
 			// Ignore empty lines
@@ -67,12 +67,12 @@ namespace subst
 
 			// Remove all instances of "0x" from the line, since the location
 			// might be written in the following format 0x00112 etc. which doesn't work with std::stoi
-			std::regex zero_x_pattern("0x");
+			const std::regex zero_x_pattern("0x");
 			line = std::regex_replace(line, zero_x_pattern, "");
 
 			// Split the line into tokens
 			constexpr char split_char = ';';
-			std::vector<std::string> tokens = tokenize_string(line, split_char);
+			const std::vector<std::string> tokens = tokenize_string(line, split_char);
 
 
 			if (tokens.size() <= 1)
