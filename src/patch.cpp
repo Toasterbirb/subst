@@ -1,3 +1,4 @@
+#include "Capstone.hpp"
 #include "Hex.hpp"
 #include "Mnemonics.hpp"
 #include "Patch.hpp"
@@ -101,21 +102,9 @@ namespace subst
 					assert(bytes.size() >= disassembled_byte_count);
 					const std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
 
-					csh handle;
-					cs_insn* insn;
+					capstone capstone(bytes_to_disassemble, x86_32bit_mode, cmd.location);
 
-					cs_mode capstone_mode = CS_MODE_64;
-					if (x86_32bit_mode)
-						capstone_mode = CS_MODE_32;
-
-					if (cs_open(CS_ARCH_X86, capstone_mode, &handle) != CS_ERR_OK)
-					{
-						std::cout << "couldn't initialize capstone\n";
-						return;
-					}
-
-					const size_t instruction_count = cs_disasm(handle, bytes_to_disassemble.data(), bytes_to_disassemble.size(), cmd.location, 0, &insn);
-					if (instruction_count > 0)
+					if (capstone.instruction_count > 0)
 					{
 						// Patch out whatever the first instruction is at the given location
 						// (or multiple instructions starting from the location if the count > 1)
@@ -123,21 +112,18 @@ namespace subst
 						u64 location_offset = 0;
 						for (u64 i = 0; i < cmd.count; ++i)
 						{
-							std::cout << "patching out a " << insn[i].mnemonic << " instruction at 0x" << std::hex << cmd.location + location_offset << '\n';
-							for (u16 j = 0; j < insn[i].size; ++j)
+							std::cout << "patching out a " << capstone.instructions[i].mnemonic << " instruction at 0x" << std::hex << cmd.location + location_offset << '\n';
+							for (u16 j = 0; j < capstone.instructions[i].size; ++j)
 								bytes[cmd.location + j + location_offset] = NOP;
 
-							location_offset += insn[i].size;
+							location_offset += capstone.instructions[i].size;
 						}
-
-						cs_free(insn, instruction_count);
 					}
 					else
 					{
 						std::cout << "instruction to NOP could not be found\n";
 					}
 
-					cs_close(&handle);
 					break;
 				}
 
@@ -148,32 +134,20 @@ namespace subst
 					constexpr u8 disassembled_byte_count = 24;
 					const std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
 
-					csh handle;
-					cs_insn* insn;
+					capstone capstone(bytes_to_disassemble, x86_32bit_mode, cmd.location);
 
-					cs_mode capstone_mode = CS_MODE_64;
-					if (x86_32bit_mode)
-						capstone_mode = CS_MODE_32;
-
-					if (cs_open(CS_ARCH_X86, capstone_mode, &handle) != CS_ERR_OK)
-					{
-						std::cout << "couldn't initialize capstone\n";
-						return;
-					}
-
-					const size_t instruction_count = cs_disasm(handle, bytes_to_disassemble.data(), bytes_to_disassemble.size(), cmd.location, 0, &insn);
-					if (instruction_count > 0)
+					if (capstone.instruction_count > 0)
 					{
 						// Only check the first instruction since that is supposed to be a conditional
 						mnemonic conditional;
 
 						try
 						{
-							conditional = str_to_mnemonic.at(insn[0].mnemonic);
+							conditional = str_to_mnemonic.at(capstone.instructions[0].mnemonic);
 						}
 						catch (std::exception e)
 						{
-							std::cout << "error! unimplemented conditional inversion: " << insn[0].mnemonic << '\n';
+							std::cout << "error! unimplemented conditional inversion: " << capstone.instructions[0].mnemonic << '\n';
 							exit(5);
 						}
 
@@ -232,15 +206,11 @@ namespace subst
 								bytes[cmd.location] = less_than;
 								break;
 						}
-
-						cs_free(insn, instruction_count);
 					}
 					else
 					{
 						std::cout << "no conditional instrunctions were found at location " << std::hex << cmd.location << '\n';
 					}
-
-					cs_close(&handle);
 
 					break;
 				}
