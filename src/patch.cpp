@@ -102,7 +102,7 @@ namespace subst
 					assert(bytes.size() >= disassembled_byte_count);
 					const std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
 
-					capstone capstone(bytes_to_disassemble, x86_32bit_mode, cmd.location);
+					const capstone capstone(bytes_to_disassemble, x86_32bit_mode, cmd.location);
 
 					if (capstone.instruction_count > 0)
 					{
@@ -134,7 +134,7 @@ namespace subst
 					constexpr u8 disassembled_byte_count = 24;
 					const std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
 
-					capstone capstone(bytes_to_disassemble, x86_32bit_mode, cmd.location);
+					const capstone capstone(bytes_to_disassemble, x86_32bit_mode, cmd.location);
 
 					if (capstone.instruction_count > 0)
 					{

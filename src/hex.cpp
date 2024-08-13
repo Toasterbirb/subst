@@ -66,7 +66,7 @@ namespace subst
 
 	void disasm_bytes(const std::vector<u8>& bytes, u64 starting_address, bool x86_32bit_mode)
 	{
-		capstone capstone(bytes, x86_32bit_mode, starting_address);
+		const capstone capstone(bytes, x86_32bit_mode, starting_address);
 
 		if (capstone.instruction_count > 0)
 		{
