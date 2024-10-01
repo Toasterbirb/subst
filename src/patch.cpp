@@ -242,6 +242,7 @@ namespace subst
 					// If the distance is longer, we'll do a "near jump" with a 32-bit offset
 
 					const i64 distance = static_cast<i64>(cmd.destination) - static_cast<i64>(cmd.location);
+
 					if (distance - 30 <= 128)
 					{
 						std::cout << "creating a short jump 0x" << std::hex << cmd.location  << " -> 0x" << cmd.destination << std::dec << " (" << std::dec << distance << " bytes)\n";
@@ -263,6 +264,9 @@ namespace subst
 						bytes[cmd.location + 3] = (offset_distance & 0x00ff0000UL) >> 16;
 						bytes[cmd.location + 4] = (offset_distance & 0xff000000UL) >> 24;
 					}
+
+					if (cmd.location + distance > bytes.size())
+						std::cout << "warning: the created jump jumps to a location outside the bounds of the binary\n";
 
 					break;
 				}
