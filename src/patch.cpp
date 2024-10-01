@@ -98,6 +98,15 @@ namespace subst
 					// NOP out a mnemonic
 					constexpr u8 disassembled_byte_count = 24;
 					assert(bytes.size() >= disassembled_byte_count);
+
+					if (cmd.location > bytes.size())
+					{
+						std::cout << "error in a nopi command!\n"
+							<< "location 0x" << std::hex << cmd.location << " is out of bounds\n"
+							<< "the size of the program is " << std::dec << bytes.size() << " bytes\n";
+						exit(1);
+					}
+
 					const std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
 
 					const capstone capstone(bytes_to_disassemble, x86_32bit_mode, cmd.location);
