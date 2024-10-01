@@ -86,6 +86,10 @@ namespace subst
 						// NOP out the given amount of bytes starting from the given location
 						std::cout << "replacing " << std::dec << cmd.count << " bytes with NOP at 0x" << std::hex << cmd.location << '\n';
 
+						if (cmd.location + cmd.count > bytes.size())
+							std::cout << "note: the amount of bytes to nop would be enough to go outside of the binary\n"
+								<< "only " << std::dec << bytes.size() - cmd.location << " bytes will be actually replaced with nops\n";
+
 						for (size_t i = cmd.location; i < cmd.location + cmd.count && i < bytes.size(); ++i)
 							bytes[i] = NOP;
 					}
