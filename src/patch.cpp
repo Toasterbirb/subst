@@ -119,6 +119,15 @@ namespace subst
 						u64 location_offset = 0;
 						for (u64 i = 0; i < cmd.count; ++i)
 						{
+							// prevent buffer overflows
+							if (cmd.location + capstone.instructions[i].size > bytes.size())
+							{
+								std::cout << "error in a nopi command!\n"
+									<< "the amount of instructions to nop (" << std::dec << cmd.count << ") from 0x" << std::hex << cmd.location << " onwards\n"
+									<< "reaches outside of the binary\n";
+								exit(1);
+							}
+
 							std::cout << "patching out a " << capstone.instructions[i].mnemonic << " instruction at 0x" << std::hex << cmd.location + location_offset << '\n';
 							for (u16 j = 0; j < capstone.instructions[i].size; ++j)
 								bytes[cmd.location + j + location_offset] = NOP;
