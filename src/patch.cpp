@@ -154,6 +154,13 @@ namespace subst
 					constexpr u8 disassembled_byte_count = 24;
 					const std::span<u8> bytes_to_disassemble(bytes.begin() + cmd.location, bytes.begin() + cmd.location + disassembled_byte_count);
 
+					// Avoid going out of bounds
+					if (cmd.location + disassembled_byte_count > bytes.size())
+					{
+						std::cout << "error: conditional inversion at 0x" << std::hex << cmd.location << " is outside the bounds of the binary\n";
+						exit(1);
+					}
+
 					const capstone capstone(bytes_to_disassemble, x86_32bit_mode, cmd.location);
 
 					if (capstone.instruction_count > 0)
