@@ -151,14 +151,14 @@ namespace subst
 			CHECK(commands.size() == 2);
 
 			CHECK(commands[0].mode == subst_cmd::mode::repat);
-			CHECK(commands[0].bytes.empty());
+			CHECK_FALSE(commands[0].bytes.has_value());
 			CHECK(commands[0].replacement_bytes == std::vector<u8>{ 0x01, 0x03 });
 			CHECK(commands[0].location == 0x52);
 			CHECK(commands[0].destination == 0);
 			CHECK(commands[0].count == 0);
 
 			CHECK(commands[1].mode == subst_cmd::mode::repat);
-			CHECK(commands[1].bytes.empty());
+			CHECK_FALSE(commands[1].bytes.has_value());
 			CHECK(commands[1].replacement_bytes == std::vector<u8>{ 0x00, 0x00, 0x00, 0x00 });
 			CHECK(commands[1].location == 0x1);
 			CHECK(commands[1].destination == 0);
@@ -179,28 +179,28 @@ namespace subst
 
 			CHECK(commands[0].mode == subst_cmd::mode::nop);
 			CHECK(commands[0].bytes == std::vector<u8>{ 0x7f, 0x45, 0x4c, 0x46 });
-			CHECK(commands[0].replacement_bytes.empty());
+			CHECK_FALSE(commands[0].replacement_bytes.has_value());
 			CHECK(commands[0].location == 0);
 			CHECK(commands[0].destination == 0);
 			CHECK(commands[0].count == 0);
 
 			CHECK(commands[1].mode == subst_cmd::mode::nop);
 			CHECK(commands[1].bytes == std::vector<u8>{ 0x01, 0x03, 0x00, 0x00 });
-			CHECK(commands[1].replacement_bytes.empty());
+			CHECK_FALSE(commands[1].replacement_bytes.has_value());
 			CHECK(commands[1].location == 0);
 			CHECK(commands[1].destination == 0);
 			CHECK(commands[1].count == 0);
 
 			CHECK(commands[2].mode == subst_cmd::mode::nop);
-			CHECK(commands[2].bytes.empty());
-			CHECK(commands[2].replacement_bytes.empty());
+			CHECK_FALSE(commands[2].bytes.has_value());
+			CHECK_FALSE(commands[2].replacement_bytes.has_value());
 			CHECK(commands[2].location == 0x5);
 			CHECK(commands[2].destination == 0);
 			CHECK(commands[2].count == 8);
 
 			CHECK(commands[3].mode == subst_cmd::mode::nop);
-			CHECK(commands[3].bytes.empty());
-			CHECK(commands[3].replacement_bytes.empty());
+			CHECK_FALSE(commands[3].bytes.has_value());
+			CHECK_FALSE(commands[3].replacement_bytes.has_value());
 			CHECK(commands[3].location == 0);
 			CHECK(commands[3].destination == 0);
 			CHECK(commands[3].count == 0);
@@ -217,15 +217,15 @@ namespace subst
 			CHECK(commands.size() == 2);
 
 			CHECK(commands[0].mode == subst_cmd::mode::nopi);
-			CHECK(commands[0].bytes.empty());
-			CHECK(commands[0].replacement_bytes.empty());
+			CHECK_FALSE(commands[0].bytes.has_value());
+			CHECK_FALSE(commands[0].replacement_bytes.has_value());
 			CHECK(commands[0].location == 0x2);
 			CHECK(commands[0].destination == 0);
 			CHECK(commands[0].count == 1);
 
 			CHECK(commands[1].mode == subst_cmd::mode::nopi);
-			CHECK(commands[1].bytes.empty());
-			CHECK(commands[1].replacement_bytes.empty());
+			CHECK_FALSE(commands[1].bytes.has_value());
+			CHECK_FALSE(commands[1].replacement_bytes.has_value());
 			CHECK(commands[1].location == 0x6);
 			CHECK(commands[1].destination == 0);
 			CHECK(commands[1].count == 4);
@@ -242,15 +242,15 @@ namespace subst
 			CHECK(commands.size() == 2);
 
 			CHECK(commands[0].mode == subst_cmd::mode::inv);
-			CHECK(commands[0].bytes.empty());
-			CHECK(commands[0].replacement_bytes.empty());
+			CHECK_FALSE(commands[0].bytes.has_value());
+			CHECK_FALSE(commands[0].replacement_bytes.has_value());
 			CHECK(commands[0].location == 0x2);
 			CHECK(commands[0].destination == 0);
 			CHECK(commands[0].count == 0);
 
 			CHECK(commands[1].mode == subst_cmd::mode::inv);
-			CHECK(commands[1].bytes.empty());
-			CHECK(commands[1].replacement_bytes.empty());
+			CHECK_FALSE(commands[1].bytes.has_value());
+			CHECK_FALSE(commands[1].replacement_bytes.has_value());
 			CHECK(commands[1].location == 0xaaaa);
 			CHECK(commands[1].destination == 0);
 			CHECK(commands[1].count == 0);
@@ -267,15 +267,15 @@ namespace subst
 			CHECK(commands.size() == 2);
 
 			CHECK(commands[0].mode == subst_cmd::mode::jmp);
-			CHECK(commands[0].bytes.empty());
-			CHECK(commands[0].replacement_bytes.empty());
+			CHECK_FALSE(commands[0].bytes.has_value());
+			CHECK_FALSE(commands[0].replacement_bytes.has_value());
 			CHECK(commands[0].location == 0x3);
 			CHECK(commands[0].destination == 0x16);
 			CHECK(commands[0].count == 0);
 
 			CHECK(commands[1].mode == subst_cmd::mode::jmp);
-			CHECK(commands[1].bytes.empty());
-			CHECK(commands[1].replacement_bytes.empty());
+			CHECK_FALSE(commands[1].bytes.has_value());
+			CHECK_FALSE(commands[1].replacement_bytes.has_value());
 			CHECK(commands[1].location == 0x32);
 			CHECK(commands[1].destination == 0x0);
 			CHECK(commands[1].count == 0);

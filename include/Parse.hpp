@@ -2,6 +2,7 @@
 
 #include "Types.hpp"
 
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -27,8 +28,8 @@ namespace subst
 
 		mode mode;
 
-		std::vector<u8> bytes;
-		std::vector<u8> replacement_bytes;
+		std::optional<std::vector<u8>> bytes;
+		std::optional<std::vector<u8>> replacement_bytes;
 		u64 location{};
 		u64 destination{};
 		u64 count{};

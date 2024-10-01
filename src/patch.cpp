@@ -24,22 +24,25 @@ namespace subst
 			{
 				case subst_cmd::mode::rep:
 				{
-					if (cmd.bytes.size() != cmd.replacement_bytes.size())
+					assert(cmd.bytes.has_value());
+					assert(cmd.replacement_bytes.has_value());
+
+					if (cmd.bytes.value().size() != cmd.replacement_bytes.value().size())
 					{
 						std::cout << "the amount of bytes to replace doesn't match with the amount of replacement bytes\n";
 						exit(1);
 					}
 
-					std::cout << "replacing all instances of " << byte_str(cmd.bytes) << " with " << byte_str(cmd.replacement_bytes) << '\n';
+					std::cout << "replacing all instances of " << byte_str(cmd.bytes.value()) << " with " << byte_str(cmd.replacement_bytes.value()) << '\n';
 
 					// Find all locations where the byte array appears at
-					const std::vector<size_t> locations = subst::search_bytes(bytes, cmd.bytes);
+					const std::vector<size_t> locations = subst::search_bytes(bytes, cmd.bytes.value());
 
 					for (size_t location : locations)
 					{
 						std::cout << " -> 0x" << std::hex << location << '\n';
-						for (size_t i = 0; i < cmd.bytes.size(); ++i)
-							bytes[location + i] = cmd.replacement_bytes[i];
+						for (size_t i = 0; i < cmd.bytes.value().size(); ++i)
+							bytes[location + i] = cmd.replacement_bytes.value()[i];
 					}
 
 					break;
@@ -47,11 +50,13 @@ namespace subst
 
 				case subst_cmd::mode::repat:
 				{
-					std::cout << "replacing " << std::dec << cmd.replacement_bytes.size() << " bytes at 0x" << std::hex << cmd.location << '\n';
+					assert(cmd.replacement_bytes.has_value());
+
+					std::cout << "replacing " << std::dec << cmd.replacement_bytes.value().size() << " bytes at 0x" << std::hex << cmd.location << '\n';
 
 					// Replace bytes starting from the given point
-					for (u64 i = cmd.location; i < cmd.location + cmd.replacement_bytes.size() && i < bytes.size(); ++i)
-						bytes.at(i) = cmd.replacement_bytes.at(i - cmd.location);
+					for (u64 i = cmd.location; i < cmd.location + cmd.replacement_bytes.value().size() && i < bytes.size(); ++i)
+						bytes.at(i) = cmd.replacement_bytes.value().at(i - cmd.location);
 
 					break;
 				}
@@ -62,17 +67,17 @@ namespace subst
 					// the file with NOPs
 					if (cmd.count == 0)
 					{
-						assert(!cmd.bytes.empty());
+						assert(cmd.bytes.has_value());
 
-						std::cout << "replacing all instances of " << byte_str(cmd.bytes) << " with NOPs\n";
+						std::cout << "replacing all instances of " << byte_str(cmd.bytes.value()) << " with NOPs\n";
 
 						// Find all locations where the byte array appears at
-						const std::vector<size_t> locations = subst::search_bytes(bytes, cmd.bytes);
+						const std::vector<size_t> locations = subst::search_bytes(bytes, cmd.bytes.value());
 
 						for (size_t location : locations)
 						{
 							std::cout << " -> 0x" << std::hex << location << '\n';
-							for (size_t i = 0; i < cmd.bytes.size(); ++i)
+							for (size_t i = 0; i < cmd.bytes.value().size(); ++i)
 								bytes[location + i] = NOP;
 						}
 					}
