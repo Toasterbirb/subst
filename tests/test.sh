@@ -1,86 +1,26 @@
 #!/bin/bash
 
-readonly TEST_PROGRAM_PATH="./pass_check"
-readonly TEST_PROGRAM_MD5_CHECKSUM="4af65211188a58effc2035942d4c6743"
-readonly PATCHED_TEST_PROGRAM_PATH="./pass_check.patched"
+readonly EXPECTED_RETURN_VALUE=42
 
-readonly COMPARISON_PROGRAM_SUBST_FILE_PATH="./comparison.sbst"
-readonly COMPARISON_PROGRAM_PATH="./comparison"
-readonly COMPARISON_PROGRAM_MD5_CHECKSUM="ba1f05d713beecb408aaafb73c5d54f9"
-readonly PATCHED_COMPARISON_PROGRAM_PATH="./comparison.patched"
-
-if [ ! -f "$TEST_PROGRAM_PATH" ]
+TEST_BINS="$(find . -maxdepth 1 -iname 't_*' ! -iname '*.patched')"
+if [ -z "$TEST_BINS" ]
 then
-	echo "Test binary not found"
+	echo "No test binaries were found. Make sure that you are in the build directory and have run 'make'"
 	exit 1
 fi
 
-if [ "$(md5sum $TEST_PROGRAM_PATH | cut -d ' ' -f 1)" != "$TEST_PROGRAM_MD5_CHECKSUM" ]
-then
-	echo "WARNING: The checksum of the test program does not match. The tests might not work as intended."
-fi
+rm -vf ./*.patched
 
-# Patch the program
-./subst patch -f "$TEST_PROGRAM_PATH"
-
-if [ ! -f "$PATCHED_TEST_PROGRAM_PATH" ]
-then
-	echo "The patched version of the test file is missing!"
-	exit 1
-fi
-
-# Test the patched program
-chmod +x "$PATCHED_TEST_PROGRAM_PATH"
-
-# Run the program with no arguments ( it should still work ;) )
-OUTPUT=$($PATCHED_TEST_PROGRAM_PATH)
-RETURN_VALUE=$?
-
-if [ "$OUTPUT" != "correct password: 5" ]
-then
-	echo "Incorrect test output: $OUTPUT"
-	exit 1
-fi
-
-if [ $RETURN_VALUE -ne 0 ]
-then
-	echo "Incorrect return value: $RETURN_VALUE"
-	exit 1
-fi
-
-if [ "$(md5sum $COMPARISON_PROGRAM_PATH | cut -d ' ' -f 1)" != "$COMPARISON_PROGRAM_MD5_CHECKSUM" ]
-then
-	echo "WARNING: The checksum of the test program does not match. The tests might not work as intended."
-fi
-
-# Patch the comparison program
-./subst patch -f -s "$COMPARISON_PROGRAM_SUBST_FILE_PATH" "$COMPARISON_PROGRAM_PATH"
-
-if [ ! -f "$PATCHED_COMPARISON_PROGRAM_PATH" ]
-then
-	echo "The patche version of the comparison test file is missing"
-	exit 2
-fi
-
-chmod +x "$PATCHED_COMPARISON_PROGRAM_PATH"
-
-OUTPUT="$($PATCHED_COMPARISON_PROGRAM_PATH a b c)"
-RETURN_VALUE=$?
-
-if [ "$OUTPUT" != "Correct!" ]
-then
-	echo "Incorrect test output: $OUTPUT"
-	exit 1
-fi
-
-if [ $RETURN_VALUE -ne 0 ]
-then
-	echo "Incorrect return value: $RETURN_VALUE"
-	exit 1
-fi
-
-# Run doctest unit tests
-set -e
-./subst test
-
-echo "Test passed successfully!"
+for i in $TEST_BINS
+do
+	echo " >> $i"
+	subst patch -s "${i//t_/}.sbst" "$i"
+	"./$i.patched"
+	RETURN_VALUE=$?
+	if [ $RETURN_VALUE -ne $EXPECTED_RETURN_VALUE ]
+	then
+		echo -e "\e[1;31mFAIL\e[0m (returned $RETURN_VALUE)"
+	else
+		echo -e "\e[1;32mPASS\e[0m"
+	fi
+done

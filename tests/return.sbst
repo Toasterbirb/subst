@@ -1,0 +1,3 @@
+# Modify the return value by changing
+# "mov edi, 0" instruction to "mov edi, 42"
+repat ; 0x00401005 ; bf 2a 00 00 00

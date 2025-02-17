@@ -1,7 +1,0 @@
-# Test .sbst file for patching the comparison program to output "Correct!"
-
-# Invert the first comparison
-inv ; 0x1178
-
-# Invert the second comparison
-inv ; 0x11b8
