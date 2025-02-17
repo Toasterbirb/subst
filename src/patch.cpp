@@ -54,6 +54,12 @@ namespace subst
 
 					std::cout << "replacing " << std::dec << cmd.replacement_bytes.value().size() << " bytes at 0x" << std::hex << cmd.location << '\n';
 
+					if (cmd.location > bytes.size())
+					{
+						std::cout << "error: there's no point in replacing bytes entirely outside the bounds of the binary\n";
+						exit(1);
+					}
+
 					// Replace bytes starting from the given point
 					for (u64 i = cmd.location; i < cmd.location + cmd.replacement_bytes.value().size() && i < bytes.size(); ++i)
 						bytes.at(i) = cmd.replacement_bytes.value().at(i - cmd.location);
