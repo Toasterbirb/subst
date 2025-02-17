@@ -201,22 +201,22 @@ namespace subst
 						{
 							case mnemonic::je:
 								log_invert(mnemonic_str::je, mnemonic_str::jne);
-								bytes[cmd.location] = is_equal;
+								bytes[cmd.location] = not_equal;
 								break;
 
 							case mnemonic::jne:
 								log_invert(mnemonic_str::jne, mnemonic_str::je);
-								bytes[cmd.location] = not_equal;
+								bytes[cmd.location] = is_equal;
 								break;
 
 							case mnemonic::jz:
 								log_invert(mnemonic_str::jz, mnemonic_str::jnz);
-								bytes[cmd.location] = is_equal;
+								bytes[cmd.location] = not_equal;
 								break;
 
 							case mnemonic::jnz:
 								log_invert(mnemonic_str::jnz, mnemonic_str::jz);
-								bytes[cmd.location] = not_equal;
+								bytes[cmd.location] = is_equal;
 								break;
 
 							case mnemonic::jle:
