@@ -190,8 +190,8 @@ namespace subst
 							std::cout << "inverting " << left_operand << " -> " << right_operand << " at " << std::hex << "0x" << cmd.location << '\n';
 						};
 
-						constexpr u8 is_equal = 0x75;
-						constexpr u8 not_equal = 0x74;
+						constexpr u8 is_equal = 0x74;
+						constexpr u8 not_equal = 0x75;
 						constexpr u8 less_than_or_equal = 0x7e;
 						constexpr u8 greater_than_or_equal = 0x7d;
 						constexpr u8 less_than = 0x7c;
