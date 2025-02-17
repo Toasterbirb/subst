@@ -15,7 +15,7 @@ for i in $TEST_BINS
 do
 	echo " >> $i"
 	subst patch -s "${i//t_/}.sbst" "$i"
-	"./$i.patched"
+	"$i.patched"
 	RETURN_VALUE=$?
 	if [ $RETURN_VALUE -ne $EXPECTED_RETURN_VALUE ]
 	then
