@@ -33,25 +33,25 @@ int main(int argc, char** argv)
 	// Patch options
 	bool overwrite_patched_file = false;
 
-	auto search_mode = (
+	const auto search_mode = (
 		clipp::command("search").set(selected_mode, mode::search).doc("search for things in the binary"),
 		clipp::option("-d", "--disas").set(disassemble).doc("attempt to disassemble the hex string"),
 		clipp::value("hex", hex_string).doc("search for a hex string in the binary"),
 		clipp::value("binary", binary_file_path).doc("path to a binary file to patch or query")
 	);
 
-	auto patch_mode = (
+	const auto patch_mode = (
 		clipp::command("patch").set(selected_mode, mode::patch).doc("patch the binary"),
 		clipp::option("-f").set(overwrite_patched_file).doc("overwrite a patched file if one already exists"),
 		clipp::option("-s").doc("custom subst file") & clipp::value("subst file", subst_file_path).doc("path to a subst file to use for patching"),
 		clipp::value("binary", binary_file_path).doc("path to a binary file to patch or query")
 	);
 
-	auto test_mode = (
+	const auto test_mode = (
 		clipp::command("test").set(selected_mode, mode::test).doc("run unit tests")
 	);
 
-	auto cli = (
+	const auto cli = (
 		(search_mode | patch_mode | test_mode),
 		clipp::option("-32").set(disas_32bit_mode).doc("enable 32-bit mode")
 	);
@@ -92,13 +92,13 @@ int main(int argc, char** argv)
 		{
 			if (disassemble)
 			{
-				std::vector<u8> bytes = subst::hex_str_to_bytes(hex_string);
+				const std::vector<u8> bytes = subst::hex_str_to_bytes(hex_string);
 				subst::disasm_bytes(bytes, 0x0, disas_32bit_mode);
 
 				std::cout << "\nlocations:\n";
 			}
 
-			std::vector<size_t> locations = subst::search_bytes(binary_data, hex_string);
+			const std::vector<size_t> locations = subst::search_bytes(binary_data, hex_string);
 			subst::print_hex_vec(locations);
 			break;
 		}
@@ -133,8 +133,8 @@ int main(int argc, char** argv)
 			if (subst_file_path.empty())
 				subst_file_path = binary_file_path + "." + subst_file_extension;
 
-			std::vector<std::string> subst_file_lines = subst::read_file(subst_file_path);
-			std::vector<subst::subst_cmd> subst_commands = subst::parse_subst(subst_file_lines);
+			const std::vector<std::string> subst_file_lines = subst::read_file(subst_file_path);
+			const std::vector<subst::subst_cmd> subst_commands = subst::parse_subst(subst_file_lines);
 			subst::patch_bytes(binary_data, subst_commands, disas_32bit_mode);
 
 			// Write the patched binary data into a new file
