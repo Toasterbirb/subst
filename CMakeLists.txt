@@ -27,10 +27,12 @@ set(CMAKE_ASM_FLAGS "-felf64 -O0")
 set(TEST_BINS
 	t_return
 	t_branch_inv
+	t_nop
 )
 
 add_executable(t_return ./tests/return.asm)
 add_executable(t_branch_inv ./tests/branch_inv.asm)
+add_executable(t_nop ./tests/nop.asm)
 
 FILE(GLOB TEST_FILES ./tests/*.sbst ./tests/*.sh)
 file(COPY ${TEST_FILES} DESTINATION ./)

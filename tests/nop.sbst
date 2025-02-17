@@ -1,0 +1,5 @@
+# NOP out the first syscall
+nopi ; 0x100a
+
+# NOP out the second syscall
+nop ; 0x1016 ; 2
