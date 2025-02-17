@@ -14,7 +14,7 @@ inv ; location                                   # Invert a conditional at the g
 jmp ; location ; destination                     # Create a jmp instruction to the given location that jumps to the destination address
 ```
 
-> **Note**
+> [!Note]
 > The *location* value is an offset from the beginning of the file. This value may not always be equal to the absolute addresses of instructions that different disassemblers may show. If the thing you are trying to change doesn't get changed, this is most likely the culprit.
 
 # Example
