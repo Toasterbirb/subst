@@ -32,8 +32,14 @@ namespace subst
 	{
 		// Read the file line by line
 		std::ifstream file(file_path);
-		std::string line;
 
+		if (!file.is_open())
+		{
+			std::cerr << "Could not open file " << file_path << '\n';
+			exit(1);
+		}
+
+		std::string line;
 		std::vector<std::string> lines;
 
 		while (std::getline(file, line))
