@@ -1,6 +1,7 @@
 #include "Hex.hpp"
 #include "Parse.hpp"
 
+#include <cassert>
 #include <doctest/doctest.h>
 #include <fstream>
 #include <iostream>
@@ -290,6 +291,15 @@ namespace subst
 
 	subst_cmd parse_subst_tokens(const std::vector<std::string>& tokens, const std::string& original_line)
 	{
+		assert(!tokens.empty());
+
+		// check for syntax errors like these where the first ';' is missing `repat 0x3c ; 0`
+		if (!subst_cmd::str_to_mode.contains(tokens[0]))
+		{
+			std::cout << "syntax error at line [" << original_line << "]\n";
+			abort();
+		}
+
 		subst_cmd cmd;
 		cmd.mode = subst_cmd::str_to_mode.at(tokens[0]);
 
